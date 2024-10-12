@@ -1,14 +1,16 @@
 import Konva from 'konva';
+
 import { Deck } from './Deck.ts';
 import { BasicEntity, CardEntity, EventTypes } from '../types';
 import { EventBus } from '../events';
 
 export class Card {
     private cardGroup: Konva.Group;
-    private isFlipped: boolean;
-    private frontEntities: BasicEntity[];
-    private backEntities: BasicEntity[];
-    private sideGroup: Konva.Group;
+    private _isFlipped: boolean;
+    private _frontEntities: BasicEntity[];
+    private _backEntities: BasicEntity[];
+    private _frontSideGroup: Konva.Group;
+    private _backSideGroup: Konva.Group;
     private readonly _name: string;
     private _deck: Deck | null = null;
     private _id: string;
@@ -28,10 +30,18 @@ export class Card {
 
         this._name = cardEntity.name;
         this._id = cardEntity.id;
-        this.isFlipped = cardEntity.isFlipped;
-        this.frontEntities = cardEntity.front;
-        this.backEntities = cardEntity.back;
-        this.sideGroup = new Konva.Group();
+        this._isFlipped = cardEntity.isFlipped;
+        this._frontEntities = cardEntity.front;
+        this._backEntities = cardEntity.back;
+        this._frontSideGroup = new Konva.Group({
+            visible: !this._isFlipped,
+        });
+        this._backSideGroup = new Konva.Group({
+            visible: this._isFlipped,
+        });
+
+        this.renderBasicEntities(this._frontEntities, this._frontSideGroup);
+        this.renderBasicEntities(this._backEntities, this._backSideGroup);
 
         const card = new Konva.Rect({
             x: 0,
@@ -42,25 +52,20 @@ export class Card {
         });
 
         this.cardGroup.add(card);
-        this.cardGroup.add(this.sideGroup);
+        this.cardGroup.add(this._frontSideGroup, this._backSideGroup);
 
         this.updateVisibleSide();
         this.subscribeToEvents();
     }
 
     private updateVisibleSide() {
-        if (this.sideGroup.children.length > 0) {
-            this.sideGroup.destroyChildren();
-        }
-
-        const visibleEntities = this.isFlipped ? this.backEntities : this.frontEntities;
-
-        this.renderBasicEntities(visibleEntities, this.sideGroup);
-        this.cardGroup.getLayer()?.draw();
+        this._frontSideGroup.setAttr('visible', !this._isFlipped);
+        this._backSideGroup.setAttr('visible', this._isFlipped);
+        // this.cardGroup.draw();
     }
 
     private flip() {
-        this.isFlipped = !this.isFlipped;
+        this._isFlipped = !this._isFlipped;
         this.updateVisibleSide();
     }
 
@@ -106,6 +111,7 @@ export class Card {
                         height: entity.h,
                     });
 
+                    console.log(container, image)
                     container.add(image);
                 };
 
@@ -132,5 +138,17 @@ export class Card {
 
     get id() {
         return this._id;
+    }
+
+    get isFlipped() {
+        return this._isFlipped;
+    }
+
+    get front() {
+        return this._frontEntities;
+    }
+
+    get back() {
+        return this._backEntities;
     }
 }

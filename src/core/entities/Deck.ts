@@ -7,6 +7,7 @@ export class Deck {
     private readonly _deckFor: string;
     private _cards: Card[] = [];
     private _id: string;
+    private _visible: boolean;
 
     constructor(deckEntity: DeckEntity) {
         this._deckGroup = new Konva.Group({
@@ -15,6 +16,7 @@ export class Deck {
             width: deckEntity.w,
             height: deckEntity.h,
             name: deckEntity.type,
+            visible: deckEntity.visible,
         });
 
         const box = new Konva.Rect({
@@ -24,6 +26,7 @@ export class Deck {
             strokeWidth: 5,
         });
 
+        this._visible = deckEntity.visible;
         this._deckGroup.add(box);
         this._deckFor = deckEntity.deckFor;
         this._id = deckEntity.id;
@@ -40,6 +43,8 @@ export class Deck {
 
         card.deck = this;
         this.updateVisibleCards();
+        console.log(card)
+        console.log(card.instance.getStage());
     }
 
     removeCard(card: Card) {
@@ -71,5 +76,9 @@ export class Deck {
 
     get deckFor() {
         return this._deckFor;
+    }
+
+    get visible() {
+        return this._visible;
     }
 }

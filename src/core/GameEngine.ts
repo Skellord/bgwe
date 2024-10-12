@@ -1,10 +1,9 @@
 import Konva from 'konva';
 
-import { Card, Deck, Text } from './entities';
-import { Entity } from './types';
-import { ActionsProvider, GameParamsProvider, Rules } from './rules';
-import { EventBus, EventsHandler } from './events';
-import { Button } from './entities/Button.ts';
+import { EntitiesController, Entity } from './entities';
+import { Rules, RulesController } from './rules';
+import { EventBus, EventsController } from './events';
+import { StateController } from './state';
 
 export interface EngineConfig {
     name: string;
@@ -14,88 +13,83 @@ export interface EngineConfig {
 }
 
 export class GameEngine {
-    private _cards: Card[] = [];
-    private _decks: Deck[] = [];
-    private _paramsProvider: GameParamsProvider;
-    private _actionsProvider!: ActionsProvider;
-    private _eventsHandler: EventsHandler;
-    eventBus: EventBus;
-    mainLayer: Konva.Layer;
-    dragLayer: Konva.Layer;
+    private _eventsController: EventsController;
+    private _stateController: StateController;
+    private readonly _entitiesController: EntitiesController;
+    private _rulesController: RulesController;
+    private _config: EngineConfig;
+    private _eventBus: EventBus = new EventBus();
+    mainLayer: Konva.Layer = new Konva.Layer();
+    dragLayer: Konva.Layer = new Konva.Layer();
     stage: Konva.Stage;
 
-    constructor() {
+    constructor(config: EngineConfig) {
+        this._config = config;
         this.stage = new Konva.Stage({
             container: 'container',
             width: window.innerWidth,
             height: window.innerHeight,
         });
 
-        this.mainLayer = new Konva.Layer();
-        this.dragLayer = new Konva.Layer();
-        this.eventBus = new EventBus();
-        this._paramsProvider = new GameParamsProvider(this.eventBus);
-        this._eventsHandler = new EventsHandler(this);
+        this._eventsController = new EventsController(this);
+        this._entitiesController = new EntitiesController(this);
+        this._stateController = new StateController(this);
+        this._rulesController = new RulesController(this);
     }
 
-    registerDeck(deck: Deck) {
-        this._decks.push(deck);
-    }
-
-    removeDeck(deck: Deck) {
-        this._decks = this._decks.filter(d => d.id !== deck.id);
-    }
-
-    init(config: EngineConfig) {
-        config.entities.forEach(entity => {
-            this.createEntity(entity, this.mainLayer);
+    init() {
+        this._config.entities.forEach(e => {
+            this._entitiesController.addEntity(e);
         });
 
         this.stage.add(this.mainLayer);
         this.stage.add(this.dragLayer);
-        this._eventsHandler.subscribe();
-        this._actionsProvider = new ActionsProvider(this);
+        this._entitiesController.renderEntities();
+        this._eventsController.subscribe();
 
-        if (config.rules?.actions) {
-            this._actionsProvider.registerAndActivateActions(config.rules.actions);
+        if (this._config.rules?.params) {
+            this._rulesController.registerParameters(this._config.rules.params);
         }
 
-        if (config.rules?.params) {
-            for (const parameter in config.rules.params) {
-                this._paramsProvider.addParameter({
-                    [parameter]: config.rules.params[parameter],
-                });
-            }
+        if (this._config.rules?.actions) {
+            this._rulesController.registerActions(this._config.rules.actions);
+            this._rulesController.activateActions();
         }
     }
 
-    private createEntity(entity: Entity, mainLayer: Konva.Layer) {
-        if (entity.type === 'card') {
-            const card = new Card(entity, this.eventBus);
-            mainLayer.add(card.instance);
-        } else if (entity.type === 'deck') {
-            const deck = new Deck(entity);
-            this.registerDeck(deck);
-            mainLayer.add(deck.instance);
-        } else if (entity.type === 'text') {
-            const text = new Text(entity, this.eventBus);
+    private reinitEntities(entities: Entity[]) {
+        this._eventBus.unsubscribeAll();
+        this._entitiesController.destroyEntities();
+        this.mainLayer.destroyChildren();
+        this.mainLayer.draw();
+        this.dragLayer.destroyChildren()
+        this.dragLayer.draw();
+        this._eventsController = new EventsController(this);
 
-            if (entity.listeningParam) {
-                text.subscribeParamChanging(entity.listeningParam);
-            }
+        entities.forEach(e => {
+            this._entitiesController.addEntity(e);
+        });
 
-            mainLayer.add(text.instance);
-        } else if (entity.type === 'button') {
-            const button = new Button(entity, this.eventBus);
-            mainLayer.add(button.instance);
-        }
+        this._eventsController.subscribe();
+        this._entitiesController.renderEntities();
     }
 
-    get decks() {
-        return this._decks;
+    get entitiesController() {
+        return this._entitiesController;
     }
 
-    get paramsProvider() {
-        return this._paramsProvider;
+    get eventBus() {
+        return this._eventBus;
+    }
+
+    saveState() {
+        this._stateController.saveState();
+    }
+
+    loadState() {
+        const entities = this._stateController.getState();
+        console.log(entities)
+        this.reinitEntities(entities);
+        console.log(this);
     }
 }

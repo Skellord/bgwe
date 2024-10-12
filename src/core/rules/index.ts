@@ -1,3 +1,4 @@
-export { GameParamsProvider } from './GameParamsProvider.ts';
-export { ActionsProvider } from './ActionsProvider.ts';
+export { ParamsStore } from './ParamsStore.ts';
+export { ActionsStore } from './ActionsStore.ts';
+export { RulesController } from './RulesController.ts';
 export * from './types';

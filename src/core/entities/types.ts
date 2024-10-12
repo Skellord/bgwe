@@ -16,6 +16,7 @@ export interface CardEntity extends EntityProps {
     back: BasicEntity[];
     isFlipped: boolean;
     fill?: string;
+    deckId?: string;
 }
 
 export interface MagnetEntity extends EntityProps {
@@ -51,6 +52,7 @@ export interface BasicEntityProps {
     x: number;
     y: number;
     type: BasicEntityType;
+    id: string;
 }
 
 export interface ImageEntity extends BasicEntityProps {

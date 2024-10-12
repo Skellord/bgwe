@@ -13,6 +13,7 @@ const config: EngineConfig = {
                     x: 0,
                     w: 80,
                     h: 80,
+                    id: 'image1'
                 },
             ],
             front: [
@@ -23,6 +24,7 @@ const config: EngineConfig = {
                     x: 0,
                     w: 80,
                     h: 80,
+                    id: 'image2'
                 },
             ],
             h: 100,
@@ -95,11 +97,11 @@ const config: EngineConfig = {
                 name: 'action',
                 targetId: 'button1',
                 handler: evt => {
-                    const param = evt.paramsProvider.getParameter('first')
+                    const param = evt.paramsStore.getParameter('first')
                     console.log('action', param);
                     if (typeof param === 'number') {
                         // const num = parseInt(param);
-                        evt.paramsProvider.changeParameter('first', (param + 1));
+                        evt.paramsStore.changeParameter('first', (param + 1));
                     }
                 },
                 on: 'buttonclick'
@@ -108,6 +110,19 @@ const config: EngineConfig = {
     }
 };
 
-const game = new GameEngine();
+const game = new GameEngine(config);
 
-game.init(config);
+game.init();
+
+const button = document.createElement('button');
+button.innerText = 'Save';
+button.addEventListener('click', evt => {
+    game.saveState()
+});
+const button2 = document.createElement('button');
+button2.innerText = 'Load';
+button2.addEventListener('click', evt => {
+    game.loadState()
+});
+document.body.appendChild(button);
+document.body.appendChild(button2);

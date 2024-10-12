@@ -1,7 +1,7 @@
 import { GameEngine } from '../GameEngine.ts';
 import { DragEventsHandler } from './DragEventsHandler.ts';
 
-export class EventsHandler {
+export class EventsController {
     private readonly _gameEngine: GameEngine;
 
     constructor(gameEngine: GameEngine) {

@@ -18,7 +18,7 @@ export class DragEventsHandler {
         this._mainLayer = gameEngine.mainLayer;
         this._dragLayer = gameEngine.dragLayer;
         this._eventBus = gameEngine.eventBus;
-        this._decks = gameEngine.decks;
+        this._decks = gameEngine.entitiesController.decks;
         this.subscribe();
     }
 
@@ -27,11 +27,11 @@ export class DragEventsHandler {
             eventData.evt.preventDefault();
             const card = eventData.card;
             card.instance.moveTo(this._dragLayer);
-            console.log('d')
 
             if (card.deck) {
                 card.deck.removeCard(card);
             }
+            console.log(this._mainLayer);
             this._mainLayer.draw();
         });
 
@@ -57,7 +57,7 @@ export class DragEventsHandler {
                     card.instance.moveTo(this._mainLayer);
                 }
             }
-        })
+        });
     }
 
     private overlaps(pos: { x: number; y: number }, r2: IRect) {

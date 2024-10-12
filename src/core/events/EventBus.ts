@@ -1,12 +1,13 @@
 export class EventBus {
-    private _eventObject: Record<string, Array<(data: any) => void>> = {}
+    private _eventObject: Record<string, Array<(data: any) => void>> = {};
 
     fire(eventName: string, data: any) {
         const handlerList = this._eventObject[eventName];
-        console.log(eventName, handlerList, this._eventObject);
 
-        for (const handler of handlerList) {
-            handler(data);
+        if (handlerList?.length > 0) {
+            for (const handler of handlerList) {
+                handler(data);
+            }
         }
     }
 
@@ -14,8 +15,11 @@ export class EventBus {
         if (!this._eventObject[eventName]) {
             this._eventObject[eventName] = [];
         }
-        console.log(this._eventObject)
 
         this._eventObject[eventName].push(handler);
+    }
+
+    unsubscribeAll() {
+        this._eventObject = {};
     }
 }

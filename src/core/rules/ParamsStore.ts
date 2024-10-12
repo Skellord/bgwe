@@ -1,7 +1,7 @@
 import { GameParameters, ParamName, ParamValue } from './types.ts';
-import { EventBus } from '../events/EventBus.ts';
+import { EventBus } from '../events';
 
-export class GameParamsProvider {
+export class ParamsStore {
     private _parameters: GameParameters | null = null;
     private _eventBus: EventBus;
 

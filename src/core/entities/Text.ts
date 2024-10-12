@@ -18,6 +18,10 @@ export class Text {
             text: textEntity.value,
             fontSize: 18,
         });
+
+        if (textEntity.listeningParam) {
+            this.subscribeParamChanging(textEntity.listeningParam);
+        }
     }
 
     get instance() {
