@@ -31,11 +31,12 @@ export class DragEventsHandler {
             if (card.deck) {
                 card.deck.removeCard(card);
             }
-            console.log(this._mainLayer);
+
             this._mainLayer.draw();
         });
 
         this._eventBus.subscribe(EventTypes.CardDragEnd, eventData => {
+            console.log('carddragend')
             const card = eventData.card;
             let pos = this._stage.getPointerPosition();
 
@@ -44,7 +45,6 @@ export class DragEventsHandler {
                 for (const deck of this._decks) {
                     if (this.overlaps(pos, deck.instance.getClientRect())) {
                         overlappingDeck = deck;
-                        console.log(deck);
                         break;
                     }
                 }
@@ -57,6 +57,10 @@ export class DragEventsHandler {
                     card.instance.moveTo(this._mainLayer);
                 }
             }
+
+            this._eventBus.fire('_change', {
+                targetId: card.id,
+            });
         });
     }
 

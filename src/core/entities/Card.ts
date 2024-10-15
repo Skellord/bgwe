@@ -1,19 +1,19 @@
 import Konva from 'konva';
 
 import { Deck } from './Deck.ts';
-import { BasicEntity, CardEntity, EventTypes } from '../types';
-import { EventBus } from '../events';
+import { EventBus, EventTypes } from '../events';
+import { BasicEntity, CardEntity } from './types.ts';
 
 export class Card {
-    private cardGroup: Konva.Group;
+    private readonly cardGroup: Konva.Group;
     private _isFlipped: boolean;
-    private _frontEntities: BasicEntity[];
-    private _backEntities: BasicEntity[];
-    private _frontSideGroup: Konva.Group;
-    private _backSideGroup: Konva.Group;
+    private readonly _frontEntities: BasicEntity[];
+    private readonly _backEntities: BasicEntity[];
+    private readonly _frontSideGroup: Konva.Group;
+    private readonly _backSideGroup: Konva.Group;
     private readonly _name: string;
     private _deck: Deck | null = null;
-    private _id: string;
+    private readonly _id: string;
     private _eventBus: EventBus;
 
     constructor(cardEntity: CardEntity, eventBus: EventBus) {
@@ -61,7 +61,6 @@ export class Card {
     private updateVisibleSide() {
         this._frontSideGroup.setAttr('visible', !this._isFlipped);
         this._backSideGroup.setAttr('visible', this._isFlipped);
-        // this.cardGroup.draw();
     }
 
     private flip() {
@@ -88,13 +87,13 @@ export class Card {
             this.flip();
         });
 
-        this.cardGroup.on('click', (evt) => {
+        this.cardGroup.on('click', evt => {
             this._eventBus.fire('cardclick', {
                 card: this,
                 evt: evt.evt,
-                targetId: '1'
+                targetId: '1',
             });
-        })
+        });
     }
 
     private renderBasicEntities(basicEntities: BasicEntity[], container: Konva.Group) {
@@ -111,7 +110,6 @@ export class Card {
                         height: entity.h,
                     });
 
-                    console.log(container, image)
                     container.add(image);
                 };
 

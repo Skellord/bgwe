@@ -1,4 +1,5 @@
 import { EngineConfig, GameEngine } from './core/GameEngine.ts';
+import { Network } from './network/Network.ts';
 
 const config: EngineConfig = {
     entities: [
@@ -110,14 +111,20 @@ const config: EngineConfig = {
     }
 };
 
-const game = new GameEngine(config);
 
+const network = new Network();
+const adapter = network.getNetworkAdapter()
+const game = new GameEngine(config, adapter);
+
+network.init();
 game.init();
+
+
 
 const button = document.createElement('button');
 button.innerText = 'Save';
 button.addEventListener('click', evt => {
-    game.saveState()
+    game.saveState();;
 });
 const button2 = document.createElement('button');
 button2.innerText = 'Load';

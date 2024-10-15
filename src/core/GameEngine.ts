@@ -4,6 +4,7 @@ import { EntitiesController, Entity } from './entities';
 import { Rules, RulesController } from './rules';
 import { EventBus, EventsController } from './events';
 import { StateController } from './state';
+import { NetworkAdapter } from '../network/Network.ts';
 
 export interface EngineConfig {
     name: string;
@@ -19,11 +20,12 @@ export class GameEngine {
     private _rulesController: RulesController;
     private _config: EngineConfig;
     private _eventBus: EventBus = new EventBus();
+    private _networkAdapter?: NetworkAdapter;
     mainLayer: Konva.Layer = new Konva.Layer();
     dragLayer: Konva.Layer = new Konva.Layer();
     stage: Konva.Stage;
 
-    constructor(config: EngineConfig) {
+    constructor(config: EngineConfig, networkAdapter?: NetworkAdapter) {
         this._config = config;
         this.stage = new Konva.Stage({
             container: 'container',
@@ -35,6 +37,9 @@ export class GameEngine {
         this._entitiesController = new EntitiesController(this);
         this._stateController = new StateController(this);
         this._rulesController = new RulesController(this);
+        this._networkAdapter = networkAdapter;
+
+        this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this))
     }
 
     init() {
@@ -55,16 +60,22 @@ export class GameEngine {
             this._rulesController.registerActions(this._config.rules.actions);
             this._rulesController.activateActions();
         }
+
+        this._eventBus.subscribe('_change', eventData => {
+            console.log('change')
+            this._stateController.saveState();
+            const e = this._stateController.getState();
+            this?._networkAdapter?.sendData(e);
+        });
     }
 
-    private reinitEntities(entities: Entity[]) {
+    reinitEntities(entities: Entity[]) {
         this._eventBus.unsubscribeAll();
         this._entitiesController.destroyEntities();
         this.mainLayer.destroyChildren();
         this.mainLayer.draw();
         this.dragLayer.destroyChildren()
         this.dragLayer.draw();
-        this._eventsController = new EventsController(this);
 
         entities.forEach(e => {
             this._entitiesController.addEntity(e);
@@ -72,6 +83,20 @@ export class GameEngine {
 
         this._eventsController.subscribe();
         this._entitiesController.renderEntities();
+
+        this._eventBus.subscribe('_change', eventData => {
+            console.log('change')
+            this._stateController.saveState();
+            const e = this._stateController.getState();
+            this?._networkAdapter?.sendData(e);
+        });
+    }
+
+    private onUpdate(data: any) {
+        console.log('onupdate', data)
+        if (data.state) {
+            this.reinitEntities(data.state);
+        }
     }
 
     get entitiesController() {
@@ -91,5 +116,14 @@ export class GameEngine {
         console.log(entities)
         this.reinitEntities(entities);
         console.log(this);
+    }
+
+    getState() {
+        return this._stateController.getState();
+    }
+
+    receiveData(data: any) {
+        console.log(data);
+        this.reinitEntities(data.state)
     }
 }
