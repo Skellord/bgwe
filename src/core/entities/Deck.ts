@@ -1,35 +1,40 @@
-import { DeckEntity } from './types.ts';
 import Konva from 'konva';
+
+import { DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
+import { EventBus, EventTypes } from '../events';
 
 export class Deck {
     private readonly _deckGroup: Konva.Group;
     private readonly _deckFor: string;
     private _cards: Card[] = [];
     private _id: string;
-    private _visible: boolean;
+    private _isFlipped: boolean;
+    private _eventBus: EventBus;
 
-    constructor(deckEntity: DeckEntity) {
+    constructor(deckEntity: DeckEntity, eventBus: EventBus) {
+        this._eventBus = eventBus;
         this._deckGroup = new Konva.Group({
             x: deckEntity.x,
             y: deckEntity.y,
             width: deckEntity.w,
             height: deckEntity.h,
             name: deckEntity.type,
-            visible: deckEntity.visible,
         });
 
         const box = new Konva.Rect({
             width: deckEntity.w,
             height: deckEntity.h,
-            stroke: 'blue',
-            strokeWidth: 5,
+            stroke: deckEntity.stroke,
+            strokeWidth: deckEntity.strokeWidth,
+            fill: deckEntity.fill,
         });
 
-        this._visible = deckEntity.visible;
+        this._isFlipped = deckEntity.isFlipped;
         this._deckGroup.add(box);
         this._deckFor = deckEntity.deckFor;
         this._id = deckEntity.id;
+        this.subscribeToEvents();
     }
 
     addCard(card: Card) {
@@ -41,25 +46,52 @@ export class Deck {
             y: 0,
         });
 
+        card.instance.offset(this._deckGroup.offset());
+        card.instance.rotation(this._deckGroup.rotation());
+
         card.deck = this;
         this.updateVisibleCards();
-        console.log(card)
-        console.log(card.instance.getStage());
+    }
+
+    flip() {
+        this._isFlipped = !this._isFlipped;
+        this.updateFlippedCards();
     }
 
     removeCard(card: Card) {
         this._cards = this._cards.filter(c => c.id !== card.id);
         card.deck = null;
+        // card.resetOffset();
         this.updateVisibleCards();
     }
 
+    private subscribeToEvents() {
+        this._deckGroup.on('contextmenu', evt => {
+            evt.evt.preventDefault();
+            this._eventBus.fire(EventTypes.DeckMenuOpen, {
+                deck: this,
+                evt: evt.evt,
+            });
+        });
+    }
+
     private updateVisibleCards() {
-        this._cards.forEach(((card, index) => {
+        this._cards.forEach((card, index) => {
             card.instance.setAttrs({
                 visible: index < 2,
                 listening: index < 2,
             });
-        }));
+        });
+
+        this.updateFlippedCards();
+    }
+
+    private updateFlippedCards() {
+        for (let i = 0; i < 2; i++) {
+            if (this._cards[i]) {
+                this._cards[i].isFlipped = this._isFlipped;
+            }
+        }
     }
 
     get id() {
@@ -78,7 +110,7 @@ export class Deck {
         return this._deckFor;
     }
 
-    get visible() {
-        return this._visible;
+    get isFlipped() {
+        return this._isFlipped;
     }
 }

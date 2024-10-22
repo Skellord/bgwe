@@ -8,10 +8,10 @@ import { Deck } from '../entities';
 
 export class DragEventsHandler {
     private _stage: Konva.Stage;
-    private _mainLayer: Konva.Layer;
-    private _dragLayer: Konva.Layer;
+    private readonly _mainLayer: Konva.Layer;
+    private readonly _dragLayer: Konva.Layer;
     private _eventBus: EventBus;
-    private _decks: Deck[] = [];
+    private readonly _decks: Deck[] = [];
 
     constructor(gameEngine: GameEngine) {
         this._stage = gameEngine.stage;
@@ -26,6 +26,7 @@ export class DragEventsHandler {
         this._eventBus.subscribe(EventTypes.CardDragStart, eventData => {
             eventData.evt.preventDefault();
             const card = eventData.card;
+            card.resetOffset();
             card.instance.moveTo(this._dragLayer);
 
             if (card.deck) {

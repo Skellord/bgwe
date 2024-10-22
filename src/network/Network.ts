@@ -2,7 +2,7 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { WebrtcProvider } from 'y-webrtc';
 
-import { Entity } from '../core/entities';
+import { Entity } from '../core';
 
 export interface NetworkAdapter {
     sendData: (entities: Entity[]) => void;

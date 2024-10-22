@@ -3,6 +3,7 @@ import Konva from 'konva';
 import { Deck } from './Deck.ts';
 import { EventBus, EventTypes } from '../events';
 import { BasicEntity, CardEntity } from './types.ts';
+import { BasicEntityShape } from './BasicEntityShape.ts';
 
 export class Card {
     private readonly cardGroup: Konva.Group;
@@ -15,9 +16,14 @@ export class Card {
     private _deck: Deck | null = null;
     private readonly _id: string;
     private _eventBus: EventBus;
+    private _defaultOffset: { x: number; y: number };
 
     constructor(cardEntity: CardEntity, eventBus: EventBus) {
         this._eventBus = eventBus;
+        this._defaultOffset = {
+            x: Math.ceil(cardEntity.w / 2),
+            y: Math.ceil(cardEntity.h / 2),
+        }
 
         this.cardGroup = new Konva.Group({
             x: cardEntity.x,
@@ -26,6 +32,7 @@ export class Card {
             height: cardEntity.h,
             draggable: true,
             name: `${cardEntity.type}_${cardEntity.name}`,
+            offset: this._defaultOffset,
         });
 
         this._name = cardEntity.name;
@@ -48,7 +55,10 @@ export class Card {
             y: 0,
             width: cardEntity.w,
             height: cardEntity.h,
-            fill: 'red',
+            fill: cardEntity.fill,
+            stroke: cardEntity.stroke,
+            strokeWidth: cardEntity.strokeWidth,
+            cornerRadius: cardEntity.cornerRadius,
         });
 
         this.cardGroup.add(card);
@@ -64,8 +74,12 @@ export class Card {
     }
 
     private flip() {
-        this._isFlipped = !this._isFlipped;
-        this.updateVisibleSide();
+        if (this._deck) {
+            this._deck.flip();
+        } else {
+            this._isFlipped = !this._isFlipped;
+            this.updateVisibleSide();
+        }
     }
 
     private subscribeToEvents() {
@@ -94,28 +108,24 @@ export class Card {
                 targetId: '1',
             });
         });
+
+        this.cardGroup.on('contextmenu', evt => {
+            evt.evt.preventDefault();
+            this._eventBus.fire(EventTypes.CardMenuOpen, {
+                card: this,
+                evt: evt.evt,
+            })
+        })
     }
 
     private renderBasicEntities(basicEntities: BasicEntity[], container: Konva.Group) {
         basicEntities.forEach(entity => {
-            if (entity.type === 'image') {
-                const imageObj = new Image();
-
-                imageObj.onload = function () {
-                    const image = new Konva.Image({
-                        x: entity.x,
-                        y: entity.y,
-                        image: imageObj,
-                        width: entity.w,
-                        height: entity.h,
-                    });
-
-                    container.add(image);
-                };
-
-                imageObj.src = entity.src;
-            }
+            BasicEntityShape.renderEntity(entity, container);
         });
+    }
+
+    public resetOffset() {
+        this.cardGroup.offset(this._defaultOffset);
     }
 
     get instance() {
@@ -140,6 +150,11 @@ export class Card {
 
     get isFlipped() {
         return this._isFlipped;
+    }
+
+    set isFlipped(isFlipped) {
+        this._isFlipped = isFlipped;
+        this.updateVisibleSide();
     }
 
     get front() {

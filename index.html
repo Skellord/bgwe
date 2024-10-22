@@ -5,9 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + TS</title>
+    <style>
+      #deck-menu, #card-menu {
+        display: none;
+        position: absolute;
+      }
+    </style>
   </head>
   <body>
     <div id="container"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/test.ts"></script>
+    <div id="deck-menu">
+      <button id="deck-flip" type="button">Flip</button>
+    </div>
+    <div id="card-menu">
+      <button id="card-rotate" type="button">Rotate</button>
+    </div>
   </body>
 </html>

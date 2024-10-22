@@ -4,13 +4,18 @@ import { EntitiesController, Entity } from './entities';
 import { Rules, RulesController } from './rules';
 import { EventBus, EventsController } from './events';
 import { StateController } from './state';
-import { NetworkAdapter } from '../network/Network.ts';
+import { NetworkAdapter } from '../network';
 
 export interface EngineConfig {
     name: string;
     version: string;
     entities: Entity[];
     rules?: Rules;
+    width?: number;
+    height?: number;
+    settings?: {
+        rotateAngle?: number;
+    };
 }
 
 export class GameEngine {
@@ -29,8 +34,8 @@ export class GameEngine {
         this._config = config;
         this.stage = new Konva.Stage({
             container: 'container',
-            width: window.innerWidth,
-            height: window.innerHeight,
+            width: config.width ?? window.innerWidth,
+            height: config.height ?? window.innerHeight,
         });
 
         this._eventsController = new EventsController(this);
@@ -61,7 +66,7 @@ export class GameEngine {
             this._rulesController.activateActions();
         }
 
-        this._eventBus.subscribe('_change', eventData => {
+        this._eventBus.subscribe('_change', () => {
             console.log('change')
             this._stateController.saveState();
             const e = this._stateController.getState();
@@ -84,8 +89,8 @@ export class GameEngine {
         this._eventsController.subscribe();
         this._entitiesController.renderEntities();
 
-        this._eventBus.subscribe('_change', eventData => {
-            console.log('change')
+        this._eventBus.subscribe('_change', () => {
+
             this._stateController.saveState();
             const e = this._stateController.getState();
             this?._networkAdapter?.sendData(e);
@@ -93,7 +98,6 @@ export class GameEngine {
     }
 
     private onUpdate(data: any) {
-        console.log('onupdate', data)
         if (data.state) {
             this.reinitEntities(data.state);
         }
@@ -105,6 +109,10 @@ export class GameEngine {
 
     get eventBus() {
         return this._eventBus;
+    }
+
+    get config() {
+        return this._config;
     }
 
     saveState() {

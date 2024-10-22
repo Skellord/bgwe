@@ -17,7 +17,7 @@ export class StateController {
             w: deck.instance.width(),
             h: deck.instance.height(),
             deckFor: deck.deckFor,
-            visible: deck.visible,
+            isFlipped: deck.isFlipped,
             type: 'deck',
             id: deck.id,
         }

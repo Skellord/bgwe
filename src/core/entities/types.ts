@@ -16,6 +16,9 @@ export interface CardEntity extends EntityProps {
     back: BasicEntity[];
     isFlipped: boolean;
     fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
+    cornerRadius?: number;
     deckId?: string;
 }
 
@@ -29,7 +32,11 @@ export interface MagnetEntity extends EntityProps {
 export interface DeckEntity extends EntityProps {
     type: 'deck';
     deckFor: string;
-    visible: boolean;
+    isFlipped: boolean;
+    withCount?: boolean;
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
 }
 
 export interface TextEntity extends EntityProps {
@@ -46,20 +53,28 @@ export interface ButtonEntity extends EntityProps {
 
 export type Entity = CardEntity | MagnetEntity | DeckEntity | TextEntity | ButtonEntity;
 
-export type BasicEntityType = 'image';
+export type BasicEntityType = 'image' | 'rectangle';
 
 export interface BasicEntityProps {
     x: number;
     y: number;
     type: BasicEntityType;
     id: string;
+    w: number;
+    h: number;
 }
 
 export interface ImageEntity extends BasicEntityProps {
     src: string;
-    w?: number;
-    h?: number;
     type: 'image';
 }
 
-export type BasicEntity = ImageEntity;
+export interface RectangleEntity extends BasicEntityProps {
+    type: 'rectangle';
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
+    rotation?: number;
+}
+
+export type BasicEntity = ImageEntity | RectangleEntity;

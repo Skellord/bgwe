@@ -53,7 +53,7 @@ export class EntitiesController {
 
     addEntity(entity: Entity) {
         if (entity.type === 'deck') {
-            const deck = new Deck(entity);
+            const deck = new Deck(entity, this._eventBus);
             this._entitiesStore.registerDeck(deck);
         }
 
