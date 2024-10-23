@@ -6,7 +6,7 @@ import { BasicEntity, CardEntity } from './types.ts';
 import { BasicEntityShape } from './BasicEntityShape.ts';
 
 export class Card {
-    private readonly cardGroup: Konva.Group;
+    private readonly _cardGroup: Konva.Group;
     private _isFlipped: boolean;
     private readonly _frontEntities: BasicEntity[];
     private readonly _backEntities: BasicEntity[];
@@ -16,24 +16,27 @@ export class Card {
     private _deck: Deck | null = null;
     private readonly _id: string;
     private _eventBus: EventBus;
-    private _defaultOffset: { x: number; y: number };
+    private _indexInDeck: number | null = null;
 
     constructor(cardEntity: CardEntity, eventBus: EventBus) {
         this._eventBus = eventBus;
-        this._defaultOffset = {
-            x: Math.ceil(cardEntity.w / 2),
-            y: Math.ceil(cardEntity.h / 2),
-        }
 
-        this.cardGroup = new Konva.Group({
+        this._cardGroup = new Konva.Group({
             x: cardEntity.x,
             y: cardEntity.y,
             width: cardEntity.w,
             height: cardEntity.h,
             draggable: true,
             name: `${cardEntity.type}_${cardEntity.name}`,
-            offset: this._defaultOffset,
+            offset: {
+                x: cardEntity.w /2,
+                y: cardEntity.h /2,
+            }
         });
+
+        if (cardEntity.indexInDeck) {
+            this._indexInDeck = cardEntity.indexInDeck;
+        }
 
         this._name = cardEntity.name;
         this._id = cardEntity.id;
@@ -61,8 +64,8 @@ export class Card {
             cornerRadius: cardEntity.cornerRadius,
         });
 
-        this.cardGroup.add(card);
-        this.cardGroup.add(this._frontSideGroup, this._backSideGroup);
+        this._cardGroup.add(card);
+        this._cardGroup.add(this._frontSideGroup, this._backSideGroup);
 
         this.updateVisibleSide();
         this.subscribeToEvents();
@@ -73,7 +76,7 @@ export class Card {
         this._backSideGroup.setAttr('visible', this._isFlipped);
     }
 
-    private flip() {
+    public flip() {
         if (this._deck) {
             this._deck.flip();
         } else {
@@ -82,26 +85,30 @@ export class Card {
         }
     }
 
+    public rotate(deg: number) {
+        this._cardGroup.rotate(deg);
+    }
+
     private subscribeToEvents() {
-        this.cardGroup.on('dragstart', evt => {
+        this._cardGroup.on('dragstart', evt => {
             this._eventBus.fire(EventTypes.CardDragStart, {
                 card: this,
                 evt: evt.evt,
             });
         });
 
-        this.cardGroup.on('dragend', evt => {
+        this._cardGroup.on('dragend', evt => {
             this._eventBus.fire(EventTypes.CardDragEnd, {
                 card: this,
                 evt: evt.evt,
             });
         });
 
-        this.cardGroup.on('dblclick', () => {
+        this._cardGroup.on('dblclick', () => {
             this.flip();
         });
 
-        this.cardGroup.on('click', evt => {
+        this._cardGroup.on('click', evt => {
             this._eventBus.fire('cardclick', {
                 card: this,
                 evt: evt.evt,
@@ -109,7 +116,7 @@ export class Card {
             });
         });
 
-        this.cardGroup.on('contextmenu', evt => {
+        this._cardGroup.on('contextmenu', evt => {
             evt.evt.preventDefault();
             this._eventBus.fire(EventTypes.CardMenuOpen, {
                 card: this,
@@ -124,12 +131,8 @@ export class Card {
         });
     }
 
-    public resetOffset() {
-        this.cardGroup.offset(this._defaultOffset);
-    }
-
     get instance() {
-        return this.cardGroup;
+        return this._cardGroup;
     }
 
     get name() {
@@ -163,5 +166,13 @@ export class Card {
 
     get back() {
         return this._backEntities;
+    }
+
+    get indexInDeck() {
+        return this._indexInDeck;
+    }
+
+    set indexInDeck(index: number | null) {
+        this._indexInDeck = index;
     }
 }

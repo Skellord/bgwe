@@ -5,10 +5,15 @@ import { GameEngine } from '../GameEngine.ts';
 export class MenuEventsHandler {
     private _stage: Konva.Stage;
     private readonly _menu: HTMLElement | null = null;
+    protected _rotateAngle: number = 90;
 
     constructor(gameEngine: GameEngine, menuId: string) {
         this._stage = gameEngine.stage;
         this._menu = document.getElementById(menuId);
+
+        if (gameEngine.config.settings?.rotateAngle) {
+            this._rotateAngle = gameEngine.config.settings.rotateAngle;
+        }
 
         window.addEventListener('click', () => {
             if (!this._menu) return;

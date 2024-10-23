@@ -7,15 +7,10 @@ import { MenuEventsHandler } from './MenuEventsHandler.ts';
 export class CardMenuEventsHandler extends MenuEventsHandler {
     private readonly _eventBus: EventBus;
     private _targetCard: Card | null = null;
-    private _rotateAngle: number = 90;
 
     constructor(gameEngine: GameEngine) {
         super(gameEngine, 'card-menu');
         this._eventBus = gameEngine.eventBus;
-
-        if (gameEngine.config.settings?.rotateAngle) {
-            this._rotateAngle = gameEngine.config.settings.rotateAngle;
-        }
 
         this.subscribe();
     }
@@ -27,12 +22,25 @@ export class CardMenuEventsHandler extends MenuEventsHandler {
         });
 
         this.subscribeToRotate();
+        this.subscribeToFlip();
     }
 
     private subscribeToRotate() {
         const rotateButton = document.getElementById('card-rotate');
+        const reverseRotateButton = document.getElementById('card-rotate-reverse');
+
         rotateButton?.addEventListener('click', () => {
-            this._targetCard?.instance.rotate(this._rotateAngle);
+            this._targetCard?.rotate(this._rotateAngle);
+        });
+
+        reverseRotateButton?.addEventListener('click', () => {
+            this._targetCard?.rotate(-this._rotateAngle);
+        })
+    }
+    private subscribeToFlip() {
+        const flipButton = document.getElementById('card-flip');
+        flipButton?.addEventListener('click', () => {
+            this._targetCard?.flip();
         });
     }
 }

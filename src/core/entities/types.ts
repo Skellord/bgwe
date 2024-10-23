@@ -20,6 +20,7 @@ export interface CardEntity extends EntityProps {
     strokeWidth?: number;
     cornerRadius?: number;
     deckId?: string;
+    indexInDeck?: number;
 }
 
 export interface MagnetEntity extends EntityProps {

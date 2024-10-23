@@ -46,6 +46,7 @@ const config: EngineConfig = {
             x: 100,
             id: '2',
             isFlipped: false,
+            fill: 'red'
         },
         {
             type: 'magnet',

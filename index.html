@@ -10,16 +10,29 @@
         display: none;
         position: absolute;
       }
+      .menu-wrapper {
+        display: flex;
+        flex-direction: column;
+      }
     </style>
   </head>
   <body>
     <div id="container"></div>
     <script type="module" src="/src/test.ts"></script>
     <div id="deck-menu">
-      <button id="deck-flip" type="button">Flip</button>
+      <div class="menu-wrapper">
+        <button id="deck-rotate" type="button">Rotate -&gt;</button>
+        <button id="deck-rotate-reverse" type="button">&lt;- Rotate</button>
+        <button id="deck-flip" type="button">Flip</button>
+        <button id="deck-shuffle" type="button">Shuffle</button>
+      </div>
     </div>
     <div id="card-menu">
-      <button id="card-rotate" type="button">Rotate</button>
+      <div class="menu-wrapper">
+        <button id="card-rotate" type="button">Rotate -&gt;</button>
+        <button id="card-rotate-reverse" type="button">&lt;- Rotate</button>
+        <button id="card-flip" type="button">Flip</button>
+      </div>
     </div>
   </body>
 </html>

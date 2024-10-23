@@ -26,7 +26,6 @@ export class DragEventsHandler {
         this._eventBus.subscribe(EventTypes.CardDragStart, eventData => {
             eventData.evt.preventDefault();
             const card = eventData.card;
-            card.resetOffset();
             card.instance.moveTo(this._dragLayer);
 
             if (card.deck) {
@@ -37,7 +36,6 @@ export class DragEventsHandler {
         });
 
         this._eventBus.subscribe(EventTypes.CardDragEnd, eventData => {
-            console.log('carddragend')
             const card = eventData.card;
             let pos = this._stage.getPointerPosition();
 

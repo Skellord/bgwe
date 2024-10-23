@@ -3,6 +3,7 @@ import Konva from 'konva';
 import { DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
 import { EventBus, EventTypes } from '../events';
+import { shuffleArray } from '../utils/shuffleArray.ts';
 
 export class Deck {
     private readonly _deckGroup: Konva.Group;
@@ -20,6 +21,10 @@ export class Deck {
             width: deckEntity.w,
             height: deckEntity.h,
             name: deckEntity.type,
+            offset: {
+                x: deckEntity.w / 2,
+                y: deckEntity.h / 2,
+            },
         });
 
         const box = new Konva.Rect({
@@ -38,17 +43,17 @@ export class Deck {
     }
 
     addCard(card: Card) {
-        this._cards.push(card);
+        if (card.indexInDeck) {
+            this._cards.splice(card.indexInDeck, 0, card);
+        } else {
+            this._cards.push(card);
+            card.indexInDeck = this._cards.length - 1;
+        }
+
         card.instance.moveTo(this._deckGroup);
-
-        card.instance.setPosition({
-            x: 0,
-            y: 0,
-        });
-
-        card.instance.offset(this._deckGroup.offset());
-        card.instance.rotation(this._deckGroup.rotation());
-
+        card.rotate(0);
+        const absolutePosition = this._deckGroup.getAbsolutePosition();
+        card.instance.setAbsolutePosition(absolutePosition);
         card.deck = this;
         this.updateVisibleCards();
     }
@@ -61,7 +66,19 @@ export class Deck {
     removeCard(card: Card) {
         this._cards = this._cards.filter(c => c.id !== card.id);
         card.deck = null;
-        // card.resetOffset();
+        card.indexInDeck = null;
+        this.updateVisibleCards();
+    }
+
+    rotate(deg: number) {
+        this._deckGroup.rotate(deg);
+    }
+
+    shuffle() {
+        shuffleArray(this._cards);
+        this._cards.forEach((c, index) => {
+            c.indexInDeck = index;
+        });
         this.updateVisibleCards();
     }
 
@@ -81,6 +98,10 @@ export class Deck {
                 visible: index < 2,
                 listening: index < 2,
             });
+
+            if (index < 2) {
+                card.instance.moveToTop();
+            }
         });
 
         this.updateFlippedCards();

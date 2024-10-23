@@ -21,12 +21,34 @@ export class DeckMenuEventsHandler extends MenuEventsHandler {
         });
 
         this.subscribeToFlip();
+        this.subscribeToRotate();
+        this.subscribeToShuffle();
     }
 
     private subscribeToFlip() {
         const flipButton = document.getElementById('deck-flip');
         flipButton?.addEventListener('click', () => {
             this._targetDeck?.flip();
+        });
+    }
+
+    private subscribeToRotate() {
+        const rotateButton = document.getElementById('deck-rotate');
+        const reverseRotateButton = document.getElementById('deck-rotate-reverse');
+
+        rotateButton?.addEventListener('click', () => {
+            this._targetDeck?.rotate(this._rotateAngle);
+        });
+
+        reverseRotateButton?.addEventListener('click', () => {
+            this._targetDeck?.rotate(-this._rotateAngle);
+        });
+    }
+
+    private subscribeToShuffle() {
+        const shuffleButton = document.getElementById('deck-shuffle');
+        shuffleButton?.addEventListener('click', () => {
+            this._targetDeck?.shuffle();
         });
     }
 }
