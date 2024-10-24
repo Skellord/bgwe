@@ -3,7 +3,7 @@ import Konva from 'konva';
 import { DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
 import { EventBus, EventTypes } from '../events';
-import { shuffleArray } from '../utils/shuffleArray.ts';
+import { Utils } from '../utils';
 
 export class Deck {
     private readonly _deckGroup: Konva.Group;
@@ -75,7 +75,7 @@ export class Deck {
     }
 
     shuffle() {
-        shuffleArray(this._cards);
+        Utils.shuffleArray(this._cards);
         this._cards.forEach((c, index) => {
             c.indexInDeck = index;
         });

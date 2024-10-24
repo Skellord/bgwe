@@ -29,9 +29,9 @@ export class Card {
             draggable: true,
             name: `${cardEntity.type}_${cardEntity.name}`,
             offset: {
-                x: cardEntity.w /2,
-                y: cardEntity.h /2,
-            }
+                x: cardEntity.w / 2,
+                y: cardEntity.h / 2,
+            },
         });
 
         if (cardEntity.indexInDeck) {
@@ -121,8 +121,8 @@ export class Card {
             this._eventBus.fire(EventTypes.CardMenuOpen, {
                 card: this,
                 evt: evt.evt,
-            })
-        })
+            });
+        });
     }
 
     private renderBasicEntities(basicEntities: BasicEntity[], container: Konva.Group) {

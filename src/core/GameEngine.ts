@@ -5,6 +5,7 @@ import { Rules, RulesController } from './rules';
 import { EventBus, EventsController } from './events';
 import { StateController } from './state';
 import { NetworkAdapter } from '../network';
+import { UIManager } from './ui/UIManager.ts';
 
 export interface EngineConfig {
     name: string;
@@ -26,6 +27,7 @@ export class GameEngine {
     private _config: EngineConfig;
     private _eventBus: EventBus = new EventBus();
     private _networkAdapter?: NetworkAdapter;
+    private _uiManager: UIManager;
     mainLayer: Konva.Layer = new Konva.Layer();
     dragLayer: Konva.Layer = new Konva.Layer();
     stage: Konva.Stage;
@@ -42,6 +44,7 @@ export class GameEngine {
         this._entitiesController = new EntitiesController(this);
         this._stateController = new StateController(this);
         this._rulesController = new RulesController(this);
+        this._uiManager = new UIManager(this);
         this._networkAdapter = networkAdapter;
 
         this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this))
@@ -113,6 +116,10 @@ export class GameEngine {
 
     get config() {
         return this._config;
+    }
+
+    get uiManager() {
+        return this._uiManager;
     }
 
     saveState() {

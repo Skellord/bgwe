@@ -4,4 +4,5 @@ export enum EventTypes {
     CardFlip = 'cardflip',
     DeckMenuOpen = 'deckmenuopen',
     CardMenuOpen = 'cardmenuopen',
+    CardHover = 'cardhover',
 }
