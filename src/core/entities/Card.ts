@@ -17,9 +17,11 @@ export class Card {
     private readonly _id: string;
     private _eventBus: EventBus;
     private _indexInDeck: number | null = null;
+    private _parameters: CardEntity;
 
     constructor(cardEntity: CardEntity, eventBus: EventBus) {
         this._eventBus = eventBus;
+        this._parameters = cardEntity;
 
         this._cardGroup = new Konva.Group({
             x: cardEntity.x,
@@ -29,8 +31,8 @@ export class Card {
             draggable: true,
             name: `${cardEntity.type}_${cardEntity.name}`,
             offset: {
-                x: cardEntity.w / 2,
-                y: cardEntity.h / 2,
+                x: Math.round(cardEntity.w / 2),
+                y: Math.round(cardEntity.h / 2),
             },
         });
 
@@ -174,5 +176,9 @@ export class Card {
 
     set indexInDeck(index: number | null) {
         this._indexInDeck = index;
+    }
+
+    get parameters() {
+        return this._parameters;
     }
 }

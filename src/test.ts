@@ -13,7 +13,7 @@ const config: EngineConfig = {
                     x: 0,
                     w: 80,
                     h: 80,
-                    id: 'image1'
+                    id: 'image1',
                 },
             ],
             front: [
@@ -24,7 +24,7 @@ const config: EngineConfig = {
                     x: 0,
                     w: 80,
                     h: 80,
-                    id: 'image2'
+                    id: 'image2',
                 },
             ],
             h: 100,
@@ -33,7 +33,7 @@ const config: EngineConfig = {
             x: 100,
             id: '1',
             isFlipped: true,
-            stroke: 'black'
+            stroke: 'black',
         },
         {
             type: 'card',
@@ -46,7 +46,20 @@ const config: EngineConfig = {
             x: 100,
             id: '2',
             isFlipped: false,
-            fill: 'red'
+            fill: 'red',
+        },
+        {
+            type: 'card',
+            name: 'default',
+            back: [],
+            front: [],
+            h: 100,
+            w: 100,
+            y: 100,
+            x: 100,
+            id: '_6',
+            isFlipped: false,
+            fill: 'blue',
         },
         {
             type: 'magnet',
@@ -66,7 +79,8 @@ const config: EngineConfig = {
             y: 500,
             id: 'deck0',
             deckFor: 'default',
-            stroke: 'red'
+            stroke: 'red',
+            withCount: true,
         },
         {
             type: 'text',
@@ -87,9 +101,10 @@ const config: EngineConfig = {
             fill: 'red',
             text: '+',
             id: 'button1',
-        }
+        },
     ],
     name: 'a',
+    background: 'grey',
     version: '1.0.0',
     rules: {
         params: {
@@ -100,17 +115,17 @@ const config: EngineConfig = {
                 name: 'action',
                 targetId: 'button1',
                 handler: evt => {
-                    const param = evt.paramsStore.getParameter('first')
+                    const param = evt.paramsStore.getParameter('first');
                     console.log('action', param);
                     if (typeof param === 'number') {
                         // const num = parseInt(param);
-                        evt.paramsStore.changeParameter('first', (param + 1));
+                        evt.paramsStore.changeParameter('first', param + 1);
                     }
                 },
-                on: 'buttonclick'
-            }
-        ]
-    }
+                on: 'buttonclick',
+            },
+        ],
+    },
 };
 
 const engine = new bgwe.engine(config);

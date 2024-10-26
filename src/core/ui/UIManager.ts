@@ -2,17 +2,23 @@ import Konva from 'konva';
 
 import { GameEngine } from '../GameEngine.ts';
 import { KonvaEventObject } from 'konva/lib/Node';
-import { Utils } from '../utils';
 
 export class UIManager {
     private _image: HTMLImageElement = new Image();
     private _tooltip: HTMLDivElement = document.createElement('div');
     private _stage: Konva.Stage;
+    private _showingTimer: number | null = null;
+    private _hidingTimer: number | null = null;
+    private _lastCard: Konva.Node | null = null;
 
     constructor(gameEngine: GameEngine) {
         this._stage = gameEngine.stage;
         this.createZoomTooltip();
         this.subscribe();
+
+        if (gameEngine.config.background) {
+            document.body.style.background = gameEngine.config.background;
+        }
     }
 
     private createZoomTooltip() {
@@ -28,11 +34,42 @@ export class UIManager {
         document.body.appendChild(this._tooltip);
     }
 
+    private createModal() {
+        // const tem
+    }
+
     private subscribe() {
-        this._stage.on('mouseover', Utils.debounce(this.mouseOverEventHandler.bind(this), 1000));
+        // this._stage.on('mouseover', this.mouseOverEventHandler.bind(this));
+        this._stage.on('click', this.mouseOverEventHandler.bind(this));
+        // this._stage.on('mousemove', () => {
+        //     if (this._hidingTimer) return;
+        //     if (this._showingTimer) return;
+        //     console.log('object :>> ');
+
+        //     this._hidingTimer = setTimeout(() => {
+        //         this.hideZoomTooltip();
+        //         clearTimeout(this._hidingTimer ?? undefined);
+        //         this._hidingTimer = null;
+        //     });
+        // });
+    }
+
+    private openModal(url: string) {
+        const modal = document.getElementById('bgwe-modal');
+        const image = document.getElementById('bgwe-modal-image');
+        const closeButton = document.getElementById('bgwe-modal-close-button');
+
+        if (modal && image) {
+            image.src = url;
+            modal.style.display = 'block';
+            closeButton?.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
     }
 
     private mouseOverEventHandler(evt: KonvaEventObject<MouseEvent, Konva.Stage>) {
+        if (evt.evt.button !== 0) return;
         if (evt.target instanceof Konva.Stage) {
             this.hideZoomTooltip();
             return;
@@ -42,9 +79,14 @@ export class UIManager {
         const card = ancestors.find(a => a.name().startsWith('card'));
 
         if (!card) return;
+        // if (card.name() === this._lastCard?.name()) return;
 
+        // this._lastCard = card;
         const url = card.toDataURL();
-        this.showZoomTooltip(url, card.width(), card.height());
+        this.openModal(url);
+        // this._showingTimer = setTimeout(() => {
+        //     this.showZoomTooltip(url, card.width(), card.height());
+        // }, 1000);
     }
 
     showZoomTooltip(url: string, width?: number, height?: number) {
@@ -59,13 +101,19 @@ export class UIManager {
         }
 
         if (position) {
-            this._tooltip.style.left = position.x + 5 + 'px';
-            this._tooltip.style.top = position.y + 5 + 'px';
+            this._tooltip.style.left = position.x + 10 + 'px';
+            this._tooltip.style.top = position.y + 10 + 'px';
             this._tooltip.style.display = 'block';
         }
     }
 
     hideZoomTooltip() {
         this._tooltip.style.display = 'none';
+        this._lastCard = null;
+
+        if (this._showingTimer) {
+            clearTimeout(this._showingTimer);
+            this._showingTimer = null;
+        }
     }
 }

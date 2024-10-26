@@ -12,9 +12,13 @@ export class Deck {
     private _id: string;
     private _isFlipped: boolean;
     private _eventBus: EventBus;
+    private _counter?: Konva.Text;
+    private _parameters: DeckEntity;
 
     constructor(deckEntity: DeckEntity, eventBus: EventBus) {
         this._eventBus = eventBus;
+        this._parameters = deckEntity;
+
         this._deckGroup = new Konva.Group({
             x: deckEntity.x,
             y: deckEntity.y,
@@ -22,8 +26,8 @@ export class Deck {
             height: deckEntity.h,
             name: deckEntity.type,
             offset: {
-                x: deckEntity.w / 2,
-                y: deckEntity.h / 2,
+                x: Math.round(deckEntity.w / 2),
+                y: Math.round(deckEntity.h / 2),
             },
         });
 
@@ -34,6 +38,21 @@ export class Deck {
             strokeWidth: deckEntity.strokeWidth,
             fill: deckEntity.fill,
         });
+
+        if (deckEntity.withCount) {
+            this._counter = new Konva.Text({
+                x: 0,
+                y: deckEntity.h + 12,
+                width: deckEntity.w,
+                height: 14,
+                fontSize: 14,
+                verticalAlign: 'middle',
+                align: 'center',
+                text: '0',
+            });
+
+            this._deckGroup.add(this._counter);
+        }
 
         this._isFlipped = deckEntity.isFlipped;
         this._deckGroup.add(box);
@@ -55,11 +74,16 @@ export class Deck {
         const absolutePosition = this._deckGroup.getAbsolutePosition();
         card.instance.setAbsolutePosition(absolutePosition);
         card.deck = this;
+        card.isFlipped = this._isFlipped;
         this.updateVisibleCards();
+        this.updateCounter();
     }
 
     flip() {
         this._isFlipped = !this._isFlipped;
+        this._cards.reverse();
+        this.updateCardIndexes();
+        this.updateVisibleCards();
         this.updateFlippedCards();
     }
 
@@ -67,7 +91,9 @@ export class Deck {
         this._cards = this._cards.filter(c => c.id !== card.id);
         card.deck = null;
         card.indexInDeck = null;
+        this.updateCardIndexes();
         this.updateVisibleCards();
+        this.updateCounter();
     }
 
     rotate(deg: number) {
@@ -76,10 +102,20 @@ export class Deck {
 
     shuffle() {
         Utils.shuffleArray(this._cards);
+        this.updateCardIndexes();
+        this.updateVisibleCards();
+    }
+
+    private updateCounter() {
+        if (this._counter) {
+            this._counter.text(this._cards.length.toString());
+        }
+    }
+
+    private updateCardIndexes() {
         this._cards.forEach((c, index) => {
             c.indexInDeck = index;
         });
-        this.updateVisibleCards();
     }
 
     private subscribeToEvents() {
@@ -95,24 +131,22 @@ export class Deck {
     private updateVisibleCards() {
         this._cards.forEach((card, index) => {
             card.instance.setAttrs({
-                visible: index < 2,
-                listening: index < 2,
+                visible: index >= this._cards.length - 2,
+                listening: index >= this._cards.length - 2,
             });
 
-            if (index < 2) {
+            if (index >= this._cards.length - 2) {
                 card.instance.moveToTop();
             }
         });
-
-        this.updateFlippedCards();
     }
 
     private updateFlippedCards() {
-        for (let i = 0; i < 2; i++) {
-            if (this._cards[i]) {
-                this._cards[i].isFlipped = this._isFlipped;
-            }
-        }
+        this._cards.forEach(c => {
+            if (c.isFlipped === this._isFlipped) return;
+
+            c.isFlipped = this._isFlipped;
+        });
     }
 
     get id() {
@@ -133,5 +167,9 @@ export class Deck {
 
     get isFlipped() {
         return this._isFlipped;
+    }
+
+    get parameters() {
+        return this._parameters;
     }
 }

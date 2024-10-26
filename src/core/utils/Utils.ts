@@ -17,7 +17,9 @@ export class Utils {
         let timer: number | null = null;
         return (...args: any[]) => {
             clearTimeout(timer as number);
-            timer = setTimeout(() => { cb.apply(this, args); }, ms);
+            timer = setTimeout(() => {
+                cb.apply(this, args);
+            }, ms);
             timer = null;
         };
     }

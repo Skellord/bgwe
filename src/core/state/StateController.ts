@@ -20,6 +20,11 @@ export class StateController {
             isFlipped: deck.isFlipped,
             type: 'deck',
             id: deck.id,
+            fill: deck.parameters.fill,
+            stroke: deck.parameters.stroke,
+            strokeWidth: deck.parameters.strokeWidth,
+            withCount: deck.parameters.withCount,
+            rotation: deck.instance.rotation(),
         }
     }
 
@@ -42,9 +47,14 @@ export class StateController {
             name: card.name,
             isFlipped: card.isFlipped,
             deckId: card.deck?.id,
-            fill: card.instance.children[0]?.getAttr('fill'),
+            fill: card.parameters.fill,
+            cornerRadius: card.parameters.cornerRadius,
+            indexInDeck: card.indexInDeck ?? undefined,
+            stroke: card.parameters.stroke,
+            strokeWidth: card.parameters.strokeWidth,
             back: card.back,
             front: card.front,
+            rotation: card.instance.rotation(),
         }
     }
 

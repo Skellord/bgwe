@@ -5,6 +5,7 @@ export interface EntityProps {
     h: number;
     x: number;
     y: number;
+    rotation?: number;
 }
 
 export type EntityType = 'card' | 'magnet' | 'deck' | 'text' | 'button';
@@ -25,7 +26,7 @@ export interface CardEntity extends EntityProps {
 
 export interface MagnetEntity extends EntityProps {
     type: 'magnet';
-    magnetFor: Exclude<EntityType, 'magnet'>
+    magnetFor: Exclude<EntityType, 'magnet'>;
     fill?: string;
     background?: ImageEntity;
 }
@@ -41,7 +42,7 @@ export interface DeckEntity extends EntityProps {
 }
 
 export interface TextEntity extends EntityProps {
-    type: 'text',
+    type: 'text';
     value: string;
     listeningParam?: string;
 }

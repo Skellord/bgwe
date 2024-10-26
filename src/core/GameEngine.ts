@@ -14,6 +14,7 @@ export interface EngineConfig {
     rules?: Rules;
     width?: number;
     height?: number;
+    background?: string;
     settings?: {
         rotateAngle?: number;
     };
@@ -47,7 +48,7 @@ export class GameEngine {
         this._uiManager = new UIManager(this);
         this._networkAdapter = networkAdapter;
 
-        this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this))
+        this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this));
     }
 
     init() {
@@ -70,7 +71,7 @@ export class GameEngine {
         }
 
         this._eventBus.subscribe('_change', () => {
-            console.log('change')
+            console.log('change');
             this._stateController.saveState();
             const e = this._stateController.getState();
             this?._networkAdapter?.sendData(e);
@@ -82,7 +83,7 @@ export class GameEngine {
         this._entitiesController.destroyEntities();
         this.mainLayer.destroyChildren();
         this.mainLayer.draw();
-        this.dragLayer.destroyChildren()
+        this.dragLayer.destroyChildren();
         this.dragLayer.draw();
 
         entities.forEach(e => {
@@ -93,7 +94,6 @@ export class GameEngine {
         this._entitiesController.renderEntities();
 
         this._eventBus.subscribe('_change', () => {
-
             this._stateController.saveState();
             const e = this._stateController.getState();
             this?._networkAdapter?.sendData(e);
@@ -128,7 +128,7 @@ export class GameEngine {
 
     loadState() {
         const entities = this._stateController.getState();
-        console.log(entities)
+        console.log(entities);
         this.reinitEntities(entities);
         console.log(this);
     }
@@ -139,6 +139,6 @@ export class GameEngine {
 
     receiveData(data: any) {
         console.log(data);
-        this.reinitEntities(data.state)
+        this.reinitEntities(data.state);
     }
 }

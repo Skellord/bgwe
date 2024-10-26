@@ -1,38 +1,70 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
-    <style>
-      #deck-menu, #card-menu {
-        display: none;
-        position: absolute;
-      }
-      .menu-wrapper {
-        display: flex;
-        flex-direction: column;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container"></div>
-    <script type="module" src="/src/test.ts"></script>
-    <div id="deck-menu">
-      <div class="menu-wrapper">
-        <button id="deck-rotate" type="button">Rotate -&gt;</button>
-        <button id="deck-rotate-reverse" type="button">&lt;- Rotate</button>
-        <button id="deck-flip" type="button">Flip</button>
-        <button id="deck-shuffle" type="button">Shuffle</button>
-      </div>
-    </div>
-    <div id="card-menu">
-      <div class="menu-wrapper">
-        <button id="card-rotate" type="button">Rotate -&gt;</button>
-        <button id="card-rotate-reverse" type="button">&lt;- Rotate</button>
-        <button id="card-flip" type="button">Flip</button>
-      </div>
-    </div>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Vite + TS</title>
+        <style>
+            #deck-menu,
+            #card-menu {
+                display: none;
+                position: absolute;
+            }
+            #bgwe-modal {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                display: none;
+            }
+            #bgwe-modal-close-button {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            #bgwe-modal-wrapper {
+                position: absolute;
+                display: flex;
+                align-items: center;
+                top: 0;
+                left: 30%;
+                width: 30%;
+                height: 100%;
+            }
+            #bgwe-modal-image {
+                width: 100%;
+            }
+            .menu-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script type="module" src="/src/test.ts"></script>
+        <div id="deck-menu">
+            <div class="menu-wrapper">
+                <button id="deck-rotate" type="button">Rotate -&gt;</button>
+                <button id="deck-rotate-reverse" type="button">&lt;- Rotate</button>
+                <button id="deck-flip" type="button">Flip</button>
+                <button id="deck-shuffle" type="button">Shuffle</button>
+            </div>
+        </div>
+        <div id="card-menu">
+            <div class="menu-wrapper">
+                <button id="card-rotate" type="button">Rotate -&gt;</button>
+                <button id="card-rotate-reverse" type="button">&lt;- Rotate</button>
+                <button id="card-flip" type="button">Flip</button>
+            </div>
+        </div>
+        <div id="bgwe-modal">
+            <button type="button" id="bgwe-modal-close-button">x</button>
+            <div id="bgwe-modal-wrapper">
+                <img id="bgwe-modal-image" src="" alt="" />
+            </div>
+        </div>
+    </body>
 </html>
