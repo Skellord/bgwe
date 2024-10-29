@@ -68,9 +68,11 @@ export class GameEngine {
             this._rulesController.activateActions();
         }
 
-        this._eventBus.subscribe('_change', () => {
+        this._eventBus.subscribe('_change', eventData => {
             console.log('change');
-            this._stateController.saveState();
+            if (eventData.target) {
+                this._stateController.changeStateByEntityObject(eventData.target);
+            }
             const e = this._stateController.getState();
             this._networkAdapter?.sendData(e);
         });
