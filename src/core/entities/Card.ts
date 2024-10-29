@@ -1,25 +1,27 @@
 import Konva from 'konva';
 
-import { Deck } from './Deck.ts';
 import { EventBus, EventTypes } from '../events';
-import { BasicEntity, CardEntity } from './types.ts';
+import { AbstractEntity, BasicEntity, CardEntity } from './types.ts';
 import { BasicEntityShape } from './BasicEntityShape.ts';
+import { Deck } from './Deck.ts';
+import { Stack } from './Stack.ts';
 
-export class Card {
+export class Card extends AbstractEntity {
     private readonly _cardGroup: Konva.Group;
-    private _isFlipped: boolean;
     private readonly _frontEntities: BasicEntity[];
     private readonly _backEntities: BasicEntity[];
     private readonly _frontSideGroup: Konva.Group;
     private readonly _backSideGroup: Konva.Group;
     private readonly _name: string;
-    private _deck: Deck | null = null;
     private readonly _id: string;
+    private _isFlipped: boolean;
+    private _parent: Deck | Stack | null = null;
     private _eventBus: EventBus;
     private _indexInDeck: number | null = null;
     private _parameters: CardEntity;
 
     constructor(cardEntity: CardEntity, eventBus: EventBus) {
+        super();
         this._eventBus = eventBus;
         this._parameters = cardEntity;
 
@@ -79,12 +81,8 @@ export class Card {
     }
 
     public flip() {
-        if (this._deck) {
-            this._deck.flip();
-        } else {
-            this._isFlipped = !this._isFlipped;
-            this.updateVisibleSide();
-        }
+        this._isFlipped = !this._isFlipped;
+        this.updateVisibleSide();
     }
 
     public rotate(deg: number) {
@@ -110,14 +108,6 @@ export class Card {
             this.flip();
         });
 
-        this._cardGroup.on('click', evt => {
-            this._eventBus.fire('cardclick', {
-                card: this,
-                evt: evt.evt,
-                targetId: '1',
-            });
-        });
-
         this._cardGroup.on('contextmenu', evt => {
             evt.evt.preventDefault();
             this._eventBus.fire(EventTypes.CardMenuOpen, {
@@ -141,12 +131,12 @@ export class Card {
         return this._name;
     }
 
-    get deck() {
-        return this._deck;
+    get parent() {
+        return this._parent;
     }
 
-    set deck(deck: Deck | null) {
-        this._deck = deck;
+    set parent(parent: Deck | Stack | null) {
+        this._parent = parent;
     }
 
     get id() {

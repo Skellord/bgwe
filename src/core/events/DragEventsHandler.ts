@@ -4,21 +4,21 @@ import { IRect } from 'konva/lib/types';
 import { EventBus } from './EventBus.ts';
 import { EventTypes } from './types.ts';
 import { GameEngine } from '../GameEngine.ts';
-import { Deck } from '../entities';
+import { Deck, Stack } from '../entities';
 
 export class DragEventsHandler {
     private _stage: Konva.Stage;
     private readonly _mainLayer: Konva.Layer;
     private readonly _dragLayer: Konva.Layer;
     private _eventBus: EventBus;
-    private readonly _decks: Deck[] = [];
+    private readonly _entities: Array<Deck | Stack> = [];
 
     constructor(gameEngine: GameEngine) {
         this._stage = gameEngine.stage;
         this._mainLayer = gameEngine.mainLayer;
         this._dragLayer = gameEngine.dragLayer;
         this._eventBus = gameEngine.eventBus;
-        this._decks = gameEngine.entitiesController.decks;
+        this._entities = [...gameEngine.entitiesController.decks, ...gameEngine.entitiesController.stacks];
         this.subscribe();
     }
 
@@ -28,8 +28,8 @@ export class DragEventsHandler {
             const card = eventData.card;
             card.instance.moveTo(this._dragLayer);
 
-            if (card.deck) {
-                card.deck.removeCard(card);
+            if (card.parent) {
+                card.parent.removeCard(card);
             }
 
             this._mainLayer.draw();
@@ -40,17 +40,17 @@ export class DragEventsHandler {
             let pos = this._stage.getPointerPosition();
 
             if (pos) {
-                let overlappingDeck;
-                for (const deck of this._decks) {
-                    if (this.overlaps(pos, deck.instance.getClientRect())) {
-                        overlappingDeck = deck;
+                let overlappingEntity;
+                for (const entity of this._entities) {
+                    if (this.overlaps(pos, entity.instance.getClientRect())) {
+                        overlappingEntity = entity;
                         break;
                     }
                 }
 
-                if (overlappingDeck) {
-                    if (card.name === overlappingDeck.deckFor) {
-                        overlappingDeck.addCard(card);
+                if (overlappingEntity) {
+                    if (card.name === overlappingEntity.for) {
+                        overlappingEntity.addCard(card);
                     }
                 } else {
                     card.instance.moveTo(this._mainLayer);
@@ -58,7 +58,7 @@ export class DragEventsHandler {
             }
 
             this._eventBus.fire('_change', {
-                targetId: card.id,
+                target: card,
             });
         });
     }

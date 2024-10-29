@@ -1,15 +1,17 @@
-import { ButtonEntity } from './types.ts';
-import { EventBus } from '../events';
 import Konva from 'konva';
 
-export class Button {
+import { AbstractEntity, ButtonEntity } from './types.ts';
+import { EventBus } from '../events';
+
+export class Button extends AbstractEntity {
     private _eventBus: EventBus;
     private readonly _buttonGroup: Konva.Group;
-    id: string;
+    private _id: string;
 
     constructor(buttonEntity: ButtonEntity, eventBus: EventBus) {
+        super();
         this._eventBus = eventBus;
-        this.id = buttonEntity.id;
+        this._id = buttonEntity.id;
 
         this._buttonGroup = new Konva.Group({
             x: buttonEntity.x,
@@ -46,14 +48,17 @@ export class Button {
 
         this._buttonGroup.on('click', evt => {
             this._eventBus.fire('buttonclick', {
-                targetId: this.id,
+                targetId: this._id,
                 evt: evt.evt,
                 button: this,
             });
-        })
+        });
     }
 
     get instance() {
         return this._buttonGroup;
+    }
+    get id() {
+        return this._id;
     }
 }

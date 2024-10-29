@@ -1,6 +1,6 @@
 import Konva from 'konva';
 
-import { EntitiesController, Entity } from './entities';
+import { EntitiesConfig, EntitiesController } from './entities';
 import { Rules, RulesController } from './rules';
 import { EventBus, EventsController } from './events';
 import { StateController } from './state';
@@ -10,11 +10,12 @@ import { UIManager } from './ui/UIManager.ts';
 export interface EngineConfig {
     name: string;
     version: string;
-    entities: Entity[];
+    entities: EntitiesConfig;
     rules?: Rules;
     width?: number;
     height?: number;
     background?: string;
+    containerName?: string;
     settings?: {
         rotateAngle?: number;
     };
@@ -35,8 +36,9 @@ export class GameEngine {
 
     constructor(config: EngineConfig, networkAdapter?: NetworkAdapter) {
         this._config = config;
+
         this.stage = new Konva.Stage({
-            container: 'container',
+            container: config.containerName ?? 'container',
             width: config.width ?? window.innerWidth,
             height: config.height ?? window.innerHeight,
         });
@@ -47,15 +49,11 @@ export class GameEngine {
         this._rulesController = new RulesController(this);
         this._uiManager = new UIManager(this);
         this._networkAdapter = networkAdapter;
-
         this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this));
     }
 
     init() {
-        this._config.entities.forEach(e => {
-            this._entitiesController.addEntity(e);
-        });
-
+        this._entitiesController.addEntities(this._config.entities);
         this.stage.add(this.mainLayer);
         this.stage.add(this.dragLayer);
         this._entitiesController.renderEntities();
@@ -74,22 +72,18 @@ export class GameEngine {
             console.log('change');
             this._stateController.saveState();
             const e = this._stateController.getState();
-            this?._networkAdapter?.sendData(e);
+            this._networkAdapter?.sendData(e);
         });
     }
 
-    reinitEntities(entities: Entity[]) {
+    reinitEntities(entitiesConfig: EntitiesConfig) {
         this._eventBus.unsubscribeAll();
         this._entitiesController.destroyEntities();
         this.mainLayer.destroyChildren();
         this.mainLayer.draw();
         this.dragLayer.destroyChildren();
         this.dragLayer.draw();
-
-        entities.forEach(e => {
-            this._entitiesController.addEntity(e);
-        });
-
+        this._entitiesController.addEntities(entitiesConfig);
         this._eventsController.subscribe();
         this._entitiesController.renderEntities();
 

@@ -5,7 +5,7 @@ import { WebrtcProvider } from 'y-webrtc';
 import { Entity } from '../core';
 
 export interface NetworkAdapter {
-    sendData: (entities: Entity[]) => void;
+    sendData: (data: any) => void;
     disconnect: () => void;
     setOnUpdateCb: (cb: (data: any) => void) => void;
 }
@@ -25,14 +25,13 @@ export class Network {
         this._ymap = this._doc.getMap('map');
 
         this._ymap.observe(() => {
-            console.log(this._onUpdateCb)
+            console.log(this._doc, this._provider);
             this._onUpdateCb?.(this._ymap?.toJSON());
         });
-        console.log(this._ymap, this._doc)
     }
 
     sendData(entities: Entity[]) {
-        console.log('senData', entities, this._ymap, this)
+        console.log('senData', entities, this._ymap, this);
         this._ymap?.set('state', entities);
     }
 

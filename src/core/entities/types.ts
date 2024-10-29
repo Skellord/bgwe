@@ -1,3 +1,6 @@
+import { type Group } from 'konva/lib/Group';
+import { type Text } from 'konva/lib/shapes/Text';
+
 export interface EntityProps {
     id: string;
     type: EntityType;
@@ -8,7 +11,7 @@ export interface EntityProps {
     rotation?: number;
 }
 
-export type EntityType = 'card' | 'magnet' | 'deck' | 'text' | 'button';
+export type EntityType = 'card' | 'deck' | 'text' | 'button' | 'stack';
 
 export interface CardEntity extends EntityProps {
     type: 'card';
@@ -20,20 +23,13 @@ export interface CardEntity extends EntityProps {
     stroke?: string;
     strokeWidth?: number;
     cornerRadius?: number;
-    deckId?: string;
+    parentId?: string;
     indexInDeck?: number;
-}
-
-export interface MagnetEntity extends EntityProps {
-    type: 'magnet';
-    magnetFor: Exclude<EntityType, 'magnet'>;
-    fill?: string;
-    background?: ImageEntity;
 }
 
 export interface DeckEntity extends EntityProps {
     type: 'deck';
-    deckFor: string;
+    for: string;
     isFlipped: boolean;
     withCount?: boolean;
     fill?: string;
@@ -53,7 +49,21 @@ export interface ButtonEntity extends EntityProps {
     fill?: string;
 }
 
-export type Entity = CardEntity | MagnetEntity | DeckEntity | TextEntity | ButtonEntity;
+export interface StackEntity extends EntityProps {
+    type: 'stack';
+    for: string;
+    stroke?: string;
+}
+
+export type Entity = CardEntity | DeckEntity | TextEntity | ButtonEntity | StackEntity;
+
+export interface EntitiesConfig {
+    decks?: DeckEntity[];
+    stacks?: StackEntity[];
+    cards?: CardEntity[];
+    buttons?: ButtonEntity[];
+    texts?: TextEntity[];
+}
 
 export type BasicEntityType = 'image' | 'rectangle';
 
@@ -80,3 +90,8 @@ export interface RectangleEntity extends BasicEntityProps {
 }
 
 export type BasicEntity = ImageEntity | RectangleEntity;
+
+export abstract class AbstractEntity {
+    abstract get instance(): Group | Text;
+    abstract get id(): string;
+}

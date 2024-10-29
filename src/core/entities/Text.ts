@@ -1,20 +1,24 @@
 import Konva from 'konva';
-import { TextEntity } from '../types';
-import { EventBus } from '../events/EventBus.ts';
 
-export class Text {
+import { AbstractEntity, TextEntity } from '../types';
+import { EventBus } from '../events';
+
+export class Text extends AbstractEntity {
     private _textShape: Konva.Text;
     private _eventBus: EventBus;
+    private _id: string;
 
     constructor(textEntity: TextEntity, eventBus: EventBus) {
+        super();
         this._eventBus = eventBus;
+        this._id = textEntity.id;
+
         this._textShape = new Konva.Text({
             x: textEntity.x,
             y: textEntity.y,
             width: textEntity.w,
             height: textEntity.h,
             name: textEntity.type,
-            id: textEntity.id,
             text: textEntity.value,
             fontSize: 18,
         });
@@ -28,6 +32,10 @@ export class Text {
         return this._textShape;
     }
 
+    get id() {
+        return this._id;
+    }
+
     setValue(value: string) {
         this._textShape.text(value);
     }
@@ -35,8 +43,7 @@ export class Text {
     subscribeParamChanging(paramName: string) {
         this._eventBus.subscribe(`change_${paramName}`, eventData => {
             const text = eventData.value;
-            console.log(eventData)
             this._textShape.text(text);
-        })
+        });
     }
 }

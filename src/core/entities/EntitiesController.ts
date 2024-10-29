@@ -1,12 +1,15 @@
+import Konva from 'konva';
+
 import { GameEngine } from '../GameEngine.ts';
 import { EntitiesStore } from './EntitiesStore.ts';
-import { Entity } from './types.ts';
+import { EventBus } from '../events';
+import { EntitiesConfig, Entity } from './types.ts';
 import { Deck } from './Deck.ts';
 import { Card } from './Card.ts';
 import { Text } from './Text.ts';
 import { Button } from './Button.ts';
-import Konva from 'konva';
-import { EventBus } from '../events';
+import { Stack } from './Stack.ts';
+import { type EntityObject } from './index.ts';
 
 export class EntitiesController {
     private _entitiesStore: EntitiesStore = new EntitiesStore();
@@ -18,65 +21,87 @@ export class EntitiesController {
         this._eventBus = gameEngine.eventBus;
     }
 
-    private renderDecks() {
-        this._entitiesStore.decks.forEach(d => {
-            this._mainLayer.add(d.instance);
-        });
+    private renderEntityObject(entityObject: EntityObject) {
+        if (entityObject instanceof Card && entityObject.parent) return;
+
+        this._mainLayer.add(entityObject.instance);
     }
 
-    private renderCards() {
-        this._entitiesStore.cards.forEach(c => {
-            if (!c.deck) {
-                this._mainLayer.add(c.instance);
-            }
-        });
-    }
+    private setParent(card: Card, parentId: string) {
+        const parent = this._entitiesStore.getDeckById(parentId) || this._entitiesStore.getStackById(parentId);
 
-    private renderTexts() {
-        this._entitiesStore.texts.forEach(t => {
-            this._mainLayer.add(t.instance);
-        });
-    }
-
-    private renderButtons() {
-        this._entitiesStore.buttons.forEach(b => {
-            this._mainLayer.add(b.instance);
-        });
+        if (parent) {
+            parent.addCard(card);
+        }
     }
 
     renderEntities() {
-        this.renderTexts();
-        this.renderButtons();
-        this.renderDecks();
-        this.renderCards();
+        this._entitiesStore.decks.forEach(this.renderEntityObject);
+        this._entitiesStore.stacks.forEach(this.renderEntityObject);
+        this._entitiesStore.texts.forEach(this.renderEntityObject);
+        this._entitiesStore.buttons.forEach(this.renderEntityObject);
+        this._entitiesStore.cards.forEach(this.renderEntityObject);
     }
 
-    addEntity(entity: Entity) {
-        if (entity.type === 'deck') {
-            const deck = new Deck(entity, this._eventBus);
-            this._entitiesStore.registerDeck(deck);
+    addEntities(entitiesConfig: EntitiesConfig) {
+        if (entitiesConfig.decks) {
+            entitiesConfig.decks.forEach(d => {
+                const deck = new Deck(d, this._eventBus);
+                this._entitiesStore.registerDeck(deck);
+            });
         }
 
-        if (entity.type === 'card') {
-            const card = new Card(entity, this._eventBus);
-            if (entity.deckId) {
-                const deck = this._entitiesStore.getDeck(entity.deckId);
+        if (entitiesConfig.stacks) {
+            entitiesConfig.stacks.forEach(s => {
+                const stack = new Stack(s);
+                this._entitiesStore.registerStack(stack);
+            });
+        }
 
-                if (deck) {
-                    deck.addCard(card);
+        if (entitiesConfig.cards) {
+            entitiesConfig.cards.forEach(c => {
+                const card = new Card(c, this._eventBus);
+
+                if (c.parentId) {
+                    this.setParent(card, c.parentId);
                 }
+
+                this._entitiesStore.registerCard(card);
+            });
+        }
+
+        if (entitiesConfig.texts) {
+            entitiesConfig.texts.forEach(t => {
+                const text = new Text(t, this._eventBus);
+                this._entitiesStore.registerText(text);
+            });
+        }
+
+        if (entitiesConfig.buttons) {
+            entitiesConfig.buttons.forEach(b => {
+                const button = new Button(b, this._eventBus);
+                this._entitiesStore.registerButton(button);
+            });
+        }
+    }
+
+    changeEntityObject(entity: Entity) {
+        if (entity.type === 'card') {
+            const card = this.cards.find(c => c.id === entity.id);
+
+            if (card) {
+                this._entitiesStore.removeCard(card);
+                card.instance.destroy();
+
+                const newCard = new Card(entity, this._eventBus);
+
+                if (entity.parentId) {
+                    this.setParent(card, entity.parentId);
+                }
+
+                this._entitiesStore.registerCard(newCard);
+                this.renderEntityObject(newCard);
             }
-            this._entitiesStore.registerCard(card);
-        }
-
-        if (entity.type === 'text') {
-            const text = new Text(entity, this._eventBus);
-            this._entitiesStore.registerText(text);
-        }
-
-        if (entity.type === 'button') {
-            const button = new Button(entity, this._eventBus);
-            this._entitiesStore.registerButton(button);
         }
     }
 
@@ -90,5 +115,9 @@ export class EntitiesController {
 
     get decks() {
         return this._entitiesStore.decks;
+    }
+
+    get stacks() {
+        return this._entitiesStore.stacks;
     }
 }

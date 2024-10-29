@@ -1,13 +1,13 @@
 import Konva from 'konva';
 
-import { DeckEntity } from './types.ts';
+import { AbstractEntity, DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
 import { EventBus, EventTypes } from '../events';
 import { Utils } from '../utils';
 
-export class Deck {
+export class Deck extends AbstractEntity {
     private readonly _deckGroup: Konva.Group;
-    private readonly _deckFor: string;
+    private readonly _for: string;
     private _cards: Card[] = [];
     private _id: string;
     private _isFlipped: boolean;
@@ -16,6 +16,7 @@ export class Deck {
     private _parameters: DeckEntity;
 
     constructor(deckEntity: DeckEntity, eventBus: EventBus) {
+        super();
         this._eventBus = eventBus;
         this._parameters = deckEntity;
 
@@ -56,7 +57,7 @@ export class Deck {
 
         this._isFlipped = deckEntity.isFlipped;
         this._deckGroup.add(box);
-        this._deckFor = deckEntity.deckFor;
+        this._for = deckEntity.for;
         this._id = deckEntity.id;
         this.subscribeToEvents();
     }
@@ -73,7 +74,7 @@ export class Deck {
         card.rotate(0);
         const absolutePosition = this._deckGroup.getAbsolutePosition();
         card.instance.setAbsolutePosition(absolutePosition);
-        card.deck = this;
+        card.parent = this;
         card.isFlipped = this._isFlipped;
         this.updateVisibleCards();
         this.updateCounter();
@@ -89,7 +90,7 @@ export class Deck {
 
     removeCard(card: Card) {
         this._cards = this._cards.filter(c => c.id !== card.id);
-        card.deck = null;
+        card.parent = null;
         card.indexInDeck = null;
         this.updateCardIndexes();
         this.updateVisibleCards();
@@ -161,8 +162,8 @@ export class Deck {
         return this._deckGroup;
     }
 
-    get deckFor() {
-        return this._deckFor;
+    get for() {
+        return this._for;
     }
 
     get isFlipped() {

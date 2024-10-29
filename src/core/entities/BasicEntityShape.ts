@@ -1,4 +1,5 @@
 import Konva from 'konva';
+
 import { BasicEntity, ImageEntity, RectangleEntity } from './types.ts';
 
 export class BasicEntityShape {
