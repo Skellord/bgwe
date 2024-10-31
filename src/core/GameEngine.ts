@@ -73,6 +73,7 @@ export class GameEngine {
             if (eventData.target) {
                 this._stateController.changeStateByEntityObject(eventData.target);
             }
+            this._stateController.saveState();
             const e = this._stateController.getState();
             this._networkAdapter?.sendData(e);
         });

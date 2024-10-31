@@ -36,11 +36,11 @@ export class EntitiesController {
     }
 
     renderEntities() {
-        this._entitiesStore.decks.forEach(this.renderEntityObject);
-        this._entitiesStore.stacks.forEach(this.renderEntityObject);
-        this._entitiesStore.texts.forEach(this.renderEntityObject);
-        this._entitiesStore.buttons.forEach(this.renderEntityObject);
-        this._entitiesStore.cards.forEach(this.renderEntityObject);
+        this._entitiesStore.decks.forEach(this.renderEntityObject.bind(this));
+        this._entitiesStore.stacks.forEach(this.renderEntityObject.bind(this));
+        this._entitiesStore.texts.forEach(this.renderEntityObject.bind(this));
+        this._entitiesStore.buttons.forEach(this.renderEntityObject.bind(this));
+        this._entitiesStore.cards.forEach(this.renderEntityObject.bind(this));
     }
 
     addEntities(entitiesConfig: EntitiesConfig) {
