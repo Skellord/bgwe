@@ -1,4 +1,4 @@
-import { Entity, EntitiesConfig, EntityType } from '../entities';
+import { Entity, EntitiesConfig, EntityType } from '../objects';
 
 const storeMap: Record<EntityType, keyof EntitiesConfig> = {
     button: 'buttons',

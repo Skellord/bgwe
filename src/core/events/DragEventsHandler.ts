@@ -4,7 +4,7 @@ import { IRect } from 'konva/lib/types';
 import { EventBus } from './EventBus.ts';
 import { EventTypes } from './types.ts';
 import { GameEngine } from '../GameEngine.ts';
-import { Deck, Stack } from '../entities';
+import { Deck, Stack } from '../objects/index.ts';
 
 export class DragEventsHandler {
     private _stage: Konva.Stage;

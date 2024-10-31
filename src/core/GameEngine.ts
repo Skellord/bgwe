@@ -1,6 +1,6 @@
 import Konva from 'konva';
 
-import { EntitiesConfig, EntitiesController } from './entities';
+import { EntitiesConfig, ObjectsController } from './objects';
 import { Rules, RulesController } from './rules';
 import { EventBus, EventsController } from './events';
 import { StateController } from './state';
@@ -24,7 +24,7 @@ export interface EngineConfig {
 export class GameEngine {
     private _eventsController: EventsController;
     private _stateController: StateController;
-    private readonly _entitiesController: EntitiesController;
+    private readonly _objectsController: ObjectsController;
     private _rulesController: RulesController;
     private _config: EngineConfig;
     private _eventBus: EventBus = new EventBus();
@@ -44,7 +44,7 @@ export class GameEngine {
         });
 
         this._eventsController = new EventsController(this);
-        this._entitiesController = new EntitiesController(this);
+        this._objectsController = new ObjectsController(this);
         this._stateController = new StateController(this);
         this._rulesController = new RulesController(this);
         this._uiManager = new UIManager(this);
@@ -53,10 +53,10 @@ export class GameEngine {
     }
 
     init() {
-        this._entitiesController.addEntities(this._config.entities);
+        this._objectsController.addEntities(this._config.entities);
         this.stage.add(this.mainLayer);
         this.stage.add(this.dragLayer);
-        this._entitiesController.renderEntities();
+        this._objectsController.renderEntities();
         this._eventsController.subscribe();
 
         if (this._config.rules?.params) {
@@ -81,14 +81,14 @@ export class GameEngine {
 
     reinitEntities(entitiesConfig: EntitiesConfig) {
         this._eventBus.unsubscribeAll();
-        this._entitiesController.destroyEntities();
+        this._objectsController.destroyEntities();
         this.mainLayer.destroyChildren();
         this.mainLayer.draw();
         this.dragLayer.destroyChildren();
         this.dragLayer.draw();
-        this._entitiesController.addEntities(entitiesConfig);
+        this._objectsController.addEntities(entitiesConfig);
         this._eventsController.subscribe();
-        this._entitiesController.renderEntities();
+        this._objectsController.renderEntities();
 
         this._eventBus.subscribe('_change', () => {
             this._stateController.saveState();
@@ -104,7 +104,7 @@ export class GameEngine {
     }
 
     get entitiesController() {
-        return this._entitiesController;
+        return this._objectsController;
     }
 
     get eventBus() {

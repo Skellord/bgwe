@@ -1,6 +1,6 @@
 import { GameEngine } from '../GameEngine.ts';
 import { StateStore } from './StateStore.ts';
-import { Card, CardEntity, Deck, DeckEntity, EntitiesConfig, EntityObject, Stack, StackEntity } from '../entities';
+import { Card, CardEntity, Deck, DeckEntity, EntitiesConfig, GameObject, Stack, StackEntity } from '../objects';
 
 export class StateController {
     private _gameEngine: GameEngine;
@@ -111,7 +111,7 @@ export class StateController {
         return this._stateStore.entities;
     }
 
-    changeStateByEntityObject(entityObject: EntityObject) {
+    changeStateByEntityObject(entityObject: GameObject) {
         if (entityObject instanceof Card) {
             const cardEntity = this.transformCardToEntity(entityObject);
             this._stateStore.changeEntity(cardEntity);

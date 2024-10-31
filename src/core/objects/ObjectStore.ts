@@ -4,7 +4,7 @@ import { Text } from './Text.ts';
 import { Button } from './Button.ts';
 import { Stack } from './Stack.ts';
 
-export class EntitiesStore {
+export class ObjectsStore {
     private _decks: Deck[] = [];
     private _cards: Card[] = [];
     private _texts: Text[] = [];

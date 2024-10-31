@@ -1,7 +1,7 @@
 import Konva from 'konva';
 
 import { AbstractEntity, ButtonEntity } from './types.ts';
-import { EventBus } from '../events';
+import { EventBus } from '../events/index.ts';
 
 export class Button extends AbstractEntity {
     private _eventBus: EventBus;

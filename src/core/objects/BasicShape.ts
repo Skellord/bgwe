@@ -2,14 +2,14 @@ import Konva from 'konva';
 
 import { BasicEntity, ImageEntity, RectangleEntity } from './types.ts';
 
-export class BasicEntityShape {
+export class BasicShape {
     public static renderEntity(entity: BasicEntity, container: Konva.Container) {
         if (entity.type === 'image') {
-            BasicEntityShape.renderImage(entity, container);
+            BasicShape.renderImage(entity, container);
         }
 
         if (entity.type === 'rectangle') {
-            BasicEntityShape.renderRectangle(entity, container);
+            BasicShape.renderRectangle(entity, container);
         }
     }
 

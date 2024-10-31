@@ -1,8 +1,8 @@
 import Konva from 'konva';
 
-import { EventBus, EventTypes } from '../events';
+import { EventBus, EventTypes } from '../events/index.ts';
 import { AbstractEntity, BasicEntity, CardEntity } from './types.ts';
-import { BasicEntityShape } from './BasicEntityShape.ts';
+import { BasicShape } from './BasicShape.ts';
 import { Deck } from './Deck.ts';
 import { Stack } from './Stack.ts';
 
@@ -119,7 +119,7 @@ export class Card extends AbstractEntity {
 
     private renderBasicEntities(basicEntities: BasicEntity[], container: Konva.Group) {
         basicEntities.forEach(entity => {
-            BasicEntityShape.renderEntity(entity, container);
+            BasicShape.renderEntity(entity, container);
         });
     }
 

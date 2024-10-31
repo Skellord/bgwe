@@ -2,8 +2,8 @@ import Konva from 'konva';
 
 import { AbstractEntity, DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
-import { EventBus, EventTypes } from '../events';
-import { Utils } from '../utils';
+import { EventBus, EventTypes } from '../events/index.ts';
+import { Utils } from '../utils/index.ts';
 
 export class Deck extends AbstractEntity {
     private readonly _deckGroup: Konva.Group;

@@ -1,18 +1,18 @@
 import Konva from 'konva';
 
 import { GameEngine } from '../GameEngine.ts';
-import { EntitiesStore } from './EntitiesStore.ts';
-import { EventBus } from '../events';
+import { ObjectsStore } from './ObjectStore.ts';
+import { EventBus } from '../events/index.ts';
 import { EntitiesConfig, Entity } from './types.ts';
 import { Deck } from './Deck.ts';
 import { Card } from './Card.ts';
 import { Text } from './Text.ts';
 import { Button } from './Button.ts';
 import { Stack } from './Stack.ts';
-import { type EntityObject } from './index.ts';
+import { type GameObject } from './index.ts';
 
-export class EntitiesController {
-    private _entitiesStore: EntitiesStore = new EntitiesStore();
+export class ObjectsController {
+    private _entitiesStore: ObjectsStore = new ObjectsStore();
     private _mainLayer: Konva.Layer;
     private readonly _eventBus: EventBus;
 
@@ -21,7 +21,7 @@ export class EntitiesController {
         this._eventBus = gameEngine.eventBus;
     }
 
-    private renderEntityObject(entityObject: EntityObject) {
+    private renderEntityObject(entityObject: GameObject) {
         if (entityObject instanceof Card && entityObject.parent) return;
 
         this._mainLayer.add(entityObject.instance);

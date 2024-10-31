@@ -1,7 +1,7 @@
 import { GameEngine } from '../GameEngine.ts';
 import { EventBus } from './EventBus.ts';
 import { EventTypes } from './types.ts';
-import { Deck } from '../entities';
+import { Deck } from '../objects/index.ts';
 import { MenuEventsHandler } from './MenuEventsHandler.ts';
 
 export class DeckMenuEventsHandler extends MenuEventsHandler {

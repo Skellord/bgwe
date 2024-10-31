@@ -1,6 +1,6 @@
 import { GameEngine } from '../GameEngine.ts';
 import { EventBus } from './EventBus.ts';
-import { Card } from '../entities';
+import { Card } from '../objects/index.ts';
 import { EventTypes } from './types.ts';
 import { MenuEventsHandler } from './MenuEventsHandler.ts';
 
@@ -35,7 +35,7 @@ export class CardMenuEventsHandler extends MenuEventsHandler {
 
         reverseRotateButton?.addEventListener('click', () => {
             this._targetCard?.rotate(-this._rotateAngle);
-        })
+        });
     }
     private subscribeToFlip() {
         const flipButton = document.getElementById('card-flip');
