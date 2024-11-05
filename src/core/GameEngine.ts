@@ -2,7 +2,7 @@ import Konva from 'konva';
 
 import { EntitiesConfig, ObjectsController } from './objects';
 import { Rules, RulesController } from './rules';
-import { EventBus, EventsController } from './events';
+import { EventBus, EventsController, InternalEvents } from './events';
 import { StateController } from './state';
 import { NetworkAdapter } from '../network';
 import { UIManager } from './ui/UIManager.ts';
@@ -50,6 +50,7 @@ export class GameEngine {
         this._uiManager = new UIManager(this);
         this._networkAdapter = networkAdapter;
         this._networkAdapter?.setOnUpdateCb(this.onUpdate.bind(this));
+        this._networkAdapter?.setSyncDataCb(this.syncState.bind(this));
     }
 
     init() {
@@ -68,18 +69,24 @@ export class GameEngine {
             this._rulesController.activateActions();
         }
 
-        this._eventBus.subscribe('_change', eventData => {
-            console.log('change');
-            if (eventData.target) {
-                this._stateController.changeStateByEntityObject(eventData.target);
-            }
-            this._stateController.saveState();
-            const e = this._stateController.getState();
-            this._networkAdapter?.sendData(e);
+        this._eventBus.subscribeInternals(eventData => {
+            this._networkAdapter?.sendData(eventData);
+            this.syncState();
         });
     }
 
-    reinitEntities(entitiesConfig: EntitiesConfig) {
+    private syncState(state?: any) {
+        if (state) {
+            // this._stateController
+            this.reinitEntities(state);
+            this._stateController.saveState();
+        } else {
+            this._stateController.saveState();
+            this._networkAdapter?.syncState(this._stateController.getState());
+        }
+    }
+
+    private reinitEntities(entitiesConfig: EntitiesConfig) {
         this._eventBus.unsubscribeAll();
         this._objectsController.destroyEntities();
         this.mainLayer.destroyChildren();
@@ -90,17 +97,15 @@ export class GameEngine {
         this._eventsController.subscribe();
         this._objectsController.renderEntities();
 
-        this._eventBus.subscribe('_change', () => {
-            this._stateController.saveState();
-            const e = this._stateController.getState();
-            this?._networkAdapter?.sendData(e);
+        this._eventBus.subscribeInternals(eventData => {
+            this._networkAdapter?.sendData(eventData);
+            this.syncState();
         });
     }
 
     private onUpdate(data: any) {
-        if (data.state) {
-            this.reinitEntities(data.state);
-        }
+        this._objectsController.update(data);
+        this._stateController.saveState();
     }
 
     get entitiesController() {
@@ -123,19 +128,7 @@ export class GameEngine {
         this._stateController.saveState();
     }
 
-    loadState() {
-        const entities = this._stateController.getState();
-        console.log(entities);
-        this.reinitEntities(entities);
-        console.log(this);
-    }
-
     getState() {
         return this._stateController.getState();
-    }
-
-    receiveData(data: any) {
-        console.log(data);
-        this.reinitEntities(data.state);
     }
 }

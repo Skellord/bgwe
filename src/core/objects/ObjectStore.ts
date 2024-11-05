@@ -3,6 +3,7 @@ import { Card } from './Card.ts';
 import { Text } from './Text.ts';
 import { Button } from './Button.ts';
 import { Stack } from './Stack.ts';
+import { GameObject } from './index.ts';
 
 export class ObjectsStore {
     private _decks: Deck[] = [];
@@ -40,11 +41,38 @@ export class ObjectsStore {
     }
 
     getDeckById(deckId: string): Deck | undefined {
-        return this._decks.find(d => d.id === deckId);
+        return this._decks.find(d => d.id() === deckId);
     }
 
     getStackById(stackId: string): Stack | undefined {
-        return this._stacks.find(s => s.id === stackId);
+        return this._stacks.find(s => s.id() === stackId);
+    }
+
+    getCardById(cardId: string): Card | undefined {
+        return this._cards.find(c => c.id() === cardId);
+    }
+
+    getTextById(textId: string): Text | undefined {
+        return this._texts.find(t => t.id() === textId);
+    }
+
+    getButtonById(buttonId: string): Button | undefined {
+        return this._buttons.find(b => b.id() === buttonId);
+    }
+
+    getById(id: string): GameObject | null {
+        const card = this.getCardById(id);
+        if (card) return card;
+        const deck = this.getDeckById(id);
+        if (deck) return deck;
+        const stack = this.getStackById(id);
+        if (stack) return stack;
+        const text = this.getTextById(id);
+        if (text) return text;
+        const button = this.getButtonById(id);
+        if (button) return button;
+
+        return null;
     }
 
     get decks() {

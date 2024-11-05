@@ -1,6 +1,3 @@
-import { type Group } from 'konva/lib/Group';
-import { type Text } from 'konva/lib/shapes/Text';
-
 export interface EntityProps {
     id: string;
     type: EntityType;
@@ -90,8 +87,3 @@ export interface RectangleEntity extends BasicEntityProps {
 }
 
 export type BasicEntity = ImageEntity | RectangleEntity;
-
-export abstract class AbstractEntity {
-    abstract get instance(): Group | Text;
-    abstract get id(): string;
-}

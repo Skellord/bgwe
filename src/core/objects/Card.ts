@@ -1,36 +1,27 @@
 import Konva from 'konva';
 
-import { EventBus, EventTypes } from '../events/index.ts';
-import { AbstractEntity, BasicEntity, CardEntity } from './types.ts';
+import { BasicEntity, CardEntity } from './types.ts';
 import { BasicShape } from './BasicShape.ts';
-import { Deck } from './Deck.ts';
-import { Stack } from './Stack.ts';
 
-export class Card extends AbstractEntity {
-    private readonly _cardGroup: Konva.Group;
+export class Card extends Konva.Group {
     private readonly _frontEntities: BasicEntity[];
     private readonly _backEntities: BasicEntity[];
     private readonly _frontSideGroup: Konva.Group;
     private readonly _backSideGroup: Konva.Group;
-    private readonly _name: string;
-    private readonly _id: string;
     private _isFlipped: boolean;
-    private _parent: Deck | Stack | null = null;
-    private _eventBus: EventBus;
     private _indexInDeck: number | null = null;
     private _parameters: CardEntity;
 
-    constructor(cardEntity: CardEntity, eventBus: EventBus) {
-        super();
-        this._eventBus = eventBus;
-        this._parameters = cardEntity;
-
-        this._cardGroup = new Konva.Group({
+    constructor(cardEntity: CardEntity) {
+        super({
             x: cardEntity.x,
             y: cardEntity.y,
             width: cardEntity.w,
             height: cardEntity.h,
             draggable: true,
+            id: cardEntity.id,
+            rotation: cardEntity.rotation,
+            //card_default
             name: `${cardEntity.type}_${cardEntity.name}`,
             offset: {
                 x: Math.round(cardEntity.w / 2),
@@ -38,15 +29,20 @@ export class Card extends AbstractEntity {
             },
         });
 
+        this._parameters = cardEntity;
+        this.on('contextmenu', eventData => {
+            eventData.evt.preventDefault();
+            this.getStage()?.fire('cardcontextmenu', { target: this });
+        });
+
         if (cardEntity.indexInDeck) {
             this._indexInDeck = cardEntity.indexInDeck;
         }
 
-        this._name = cardEntity.name;
-        this._id = cardEntity.id;
         this._isFlipped = cardEntity.isFlipped;
         this._frontEntities = cardEntity.front;
         this._backEntities = cardEntity.back;
+
         this._frontSideGroup = new Konva.Group({
             visible: !this._isFlipped,
         });
@@ -57,7 +53,7 @@ export class Card extends AbstractEntity {
         this.renderBasicEntities(this._frontEntities, this._frontSideGroup);
         this.renderBasicEntities(this._backEntities, this._backSideGroup);
 
-        const card = new Konva.Rect({
+        const box = new Konva.Rect({
             x: 0,
             y: 0,
             width: cardEntity.w,
@@ -68,11 +64,10 @@ export class Card extends AbstractEntity {
             cornerRadius: cardEntity.cornerRadius,
         });
 
-        this._cardGroup.add(card);
-        this._cardGroup.add(this._frontSideGroup, this._backSideGroup);
+        this.add(box);
+        this.add(this._frontSideGroup, this._backSideGroup);
 
         this.updateVisibleSide();
-        this.subscribeToEvents();
     }
 
     private updateVisibleSide() {
@@ -85,62 +80,10 @@ export class Card extends AbstractEntity {
         this.updateVisibleSide();
     }
 
-    public rotate(deg: number) {
-        this._cardGroup.rotate(deg);
-    }
-
-    private subscribeToEvents() {
-        this._cardGroup.on('dragstart', evt => {
-            this._eventBus.fire(EventTypes.CardDragStart, {
-                card: this,
-                evt: evt.evt,
-            });
-        });
-
-        this._cardGroup.on('dragend', evt => {
-            this._eventBus.fire(EventTypes.CardDragEnd, {
-                card: this,
-                evt: evt.evt,
-            });
-        });
-
-        this._cardGroup.on('dblclick', () => {
-            this.flip();
-        });
-
-        this._cardGroup.on('contextmenu', evt => {
-            evt.evt.preventDefault();
-            this._eventBus.fire(EventTypes.CardMenuOpen, {
-                card: this,
-                evt: evt.evt,
-            });
-        });
-    }
-
     private renderBasicEntities(basicEntities: BasicEntity[], container: Konva.Group) {
         basicEntities.forEach(entity => {
             BasicShape.renderEntity(entity, container);
         });
-    }
-
-    get instance() {
-        return this._cardGroup;
-    }
-
-    get name() {
-        return this._name;
-    }
-
-    get parent() {
-        return this._parent;
-    }
-
-    set parent(parent: Deck | Stack | null) {
-        this._parent = parent;
-    }
-
-    get id() {
-        return this._id;
     }
 
     get isFlipped() {

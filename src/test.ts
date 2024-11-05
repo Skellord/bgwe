@@ -95,7 +95,7 @@ const config: EngineConfig = {
                 w: 500,
                 h: 300,
                 x: 600,
-                y: 300,
+                y: 600,
                 for: 'default',
                 id: '_123',
                 stroke: 'green',

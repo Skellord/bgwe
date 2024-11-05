@@ -3,7 +3,7 @@ import Konva from 'konva';
 import { GameEngine } from '../GameEngine.ts';
 
 export class MenuEventsHandler {
-    private _stage: Konva.Stage;
+    protected readonly _stage: Konva.Stage;
     private readonly _menu: HTMLElement | null = null;
     protected _rotateAngle: number = 90;
 

@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "testSecond": "vite --port 5656",
+    "testThird": "vite --port 5656",
     "start-test-server": "npx y-websocket"
   },
   "devDependencies": {

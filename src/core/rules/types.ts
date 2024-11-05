@@ -6,7 +6,6 @@ export type ParamValue = string | number | boolean;
 export type GameParameters = Record<ParamName, ParamValue>;
 
 export interface GameActionObject {
-    name: string;
     paramsStore: ParamsStore;
 }
 
@@ -14,7 +13,7 @@ export type GameActionListener = (evt: GameActionObject) => void;
 
 export interface Action {
     name: string;
-    on: string,
+    on: string;
     targetId: string;
     handler: GameActionListener;
 }

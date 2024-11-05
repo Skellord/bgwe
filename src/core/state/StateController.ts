@@ -12,19 +12,19 @@ export class StateController {
 
     private transformDeckToEntity(deck: Deck): DeckEntity {
         return {
-            x: deck.instance.x(),
-            y: deck.instance.y(),
-            w: deck.instance.width(),
-            h: deck.instance.height(),
+            x: deck.x(),
+            y: deck.y(),
+            w: deck.width(),
+            h: deck.height(),
             for: deck.for,
             isFlipped: deck.isFlipped,
             type: 'deck',
-            id: deck.id,
+            id: deck.id(),
             fill: deck.parameters.fill,
             stroke: deck.parameters.stroke,
             strokeWidth: deck.parameters.strokeWidth,
             withCount: deck.parameters.withCount,
-            rotation: deck.instance.rotation(),
+            rotation: deck.rotation(),
         };
     }
 
@@ -38,15 +38,15 @@ export class StateController {
     //TODO: вынести basic entities отдельно
     private transformCardToEntity(card: Card): CardEntity {
         return {
-            x: card.instance.x(),
-            y: card.instance.y(),
-            w: card.instance.width(),
-            h: card.instance.height(),
-            id: card.id,
+            x: card.x(),
+            y: card.y(),
+            w: card.width(),
+            h: card.height(),
+            id: card.id(),
             type: 'card',
-            name: card.name,
+            name: card.name(),
             isFlipped: card.isFlipped,
-            parentId: card.parent?.id,
+            parentId: card.parent?.id(),
             fill: card.parameters.fill,
             cornerRadius: card.parameters.cornerRadius,
             indexInDeck: card.indexInDeck ?? undefined,
@@ -54,7 +54,7 @@ export class StateController {
             strokeWidth: card.parameters.strokeWidth,
             back: card.back,
             front: card.front,
-            rotation: card.instance.rotation(),
+            rotation: card.rotation(),
         };
     }
 
@@ -67,15 +67,15 @@ export class StateController {
 
     private transformStackToEntity(stack: Stack): StackEntity {
         return {
-            x: stack.instance.x(),
-            y: stack.instance.y(),
-            w: stack.instance.width(),
-            h: stack.instance.height(),
-            id: stack.id,
+            x: stack.x(),
+            y: stack.y(),
+            w: stack.width(),
+            h: stack.height(),
+            id: stack.id(),
             type: 'stack',
             for: stack.for,
-            rotation: stack.instance.rotation(),
-            stroke: stack.parameters.stroke,
+            rotation: stack.rotation(),
+            stroke: stack.stroke,
         };
     }
 

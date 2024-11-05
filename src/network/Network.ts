@@ -1,27 +1,26 @@
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
-import { WebrtcProvider } from 'y-webrtc';
 import * as Colyseus from 'colyseus.js';
 
-import { EntitiesConfig, Entity } from '../core';
-
 export interface NetworkAdapter {
-    sendData: (data: any) => void;
+    sendData: (data: Action) => void;
     disconnect: () => void;
-    setOnUpdateCb: (cb: (data: any) => void) => void;
+    setOnUpdateCb: (cb: (data: Action) => void) => void;
+    syncState: (data: any) => void;
+    setSyncDataCb: (cb: (data: any) => void) => void;
+}
+
+interface Action {
+    type: string;
+    [key: string]: string | number;
 }
 
 export class Network {
-    private readonly _doc: Y.Doc;
-    // private _provider: WebsocketProvider | WebrtcProvider;
     private _client = new Colyseus.Client('ws://localhost:2567');
     private _room?: Colyseus.Room;
-    private _ymap?: Y.Map<any>;
-    private _onUpdateCb?: (data: any) => void;
+    private _onUpdateCb?: (data: Action) => void;
+    private _onSyncDataCb?: (data: any) => void;
+    private _firstStateArrived: boolean = false;
 
     constructor() {
-        this._doc = new Y.Doc();
-        // this._provider = new WebsocketProvider('ws://localhost:1234', 'room', this._doc);
         const b = document.createElement('button');
         b.innerText = 'Connect';
         b.addEventListener('click', async () => {
@@ -36,29 +35,26 @@ export class Network {
         document.body.appendChild(d);
     }
 
-    init() {
-        // this._ymap = this._doc.getMap('map');
-        // this._ymap.observe(() => {
-        //     console.log(this._doc, this._provider);
-        //     this._onUpdateCb?.(this._ymap?.toJSON());
-        // });
+    init() {}
+
+    sendData(action: Action) {
+        this._room?.send('action', action);
     }
 
-    sendData(entities: EntitiesConfig) {
-        // console.log('senData', entities, this._ymap, this);
-        // this._ymap?.set('state', entities);
-
-        console.log(entities);
-        this._room?.send('action', JSON.stringify(entities));
+    syncState(state: any) {
+        this._room?.send('syncState', state);
     }
 
     disconnect(): void {
         this._room?.leave();
     }
 
-    setOnUpdateCb(cb: (data: any) => void) {
+    setOnUpdateCb(cb: (data: Action) => void) {
         this._onUpdateCb = cb;
-        console.log(this._onUpdateCb);
+    }
+
+    setSyncDataCb(cb: (data: any) => void) {
+        this._onSyncDataCb = cb;
     }
 
     async connect() {
@@ -68,7 +64,6 @@ export class Network {
             if (!this._room) {
                 throw new Error('Connection failed');
             }
-            console.log(this._room?.state);
 
             this.subscribe();
         } catch (err) {
@@ -78,11 +73,23 @@ export class Network {
 
     private subscribe() {
         this._room?.onStateChange(state => {
-            console.log(state);
+            if (!this._firstStateArrived) {
+                const isCreated = this._room?.state.isCreated;
+                this._firstStateArrived = true;
+
+                if (isCreated) {
+                    const json = state.gameState.get('map');
+
+                    if (json) {
+                        this._onSyncDataCb?.(JSON.parse(json));
+                    }
+                }
+            }
         });
 
         this._room?.onMessage('action', msg => {
             console.log(msg);
+            this._onUpdateCb?.(msg);
         });
     }
 
@@ -91,6 +98,8 @@ export class Network {
             sendData: this.sendData.bind(this),
             disconnect: this.disconnect,
             setOnUpdateCb: this.setOnUpdateCb.bind(this),
+            syncState: this.syncState.bind(this),
+            setSyncDataCb: this.setSyncDataCb.bind(this),
         };
     }
 }

@@ -1,36 +1,27 @@
 import Konva from 'konva';
 
-import { AbstractEntity, ButtonEntity } from './types.ts';
-import { EventBus } from '../events/index.ts';
+import { ButtonEntity } from './types.ts';
 
-export class Button extends AbstractEntity {
-    private _eventBus: EventBus;
-    private readonly _buttonGroup: Konva.Group;
-    private _id: string;
-
-    constructor(buttonEntity: ButtonEntity, eventBus: EventBus) {
-        super();
-        this._eventBus = eventBus;
-        this._id = buttonEntity.id;
-
-        this._buttonGroup = new Konva.Group({
+export class Button extends Konva.Group {
+    constructor(buttonEntity: ButtonEntity) {
+        super({
             x: buttonEntity.x,
             y: buttonEntity.y,
             width: buttonEntity.w,
             height: buttonEntity.h,
+            id: buttonEntity.id,
+            rotation: buttonEntity.rotation,
         });
 
-        if (buttonEntity.fill) {
-            const rect = new Konva.Rect({
-                x: 0,
-                y: 0,
-                width: buttonEntity.w,
-                height: buttonEntity.h,
-                fill: buttonEntity.fill,
-            });
+        const box = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: buttonEntity.w,
+            height: buttonEntity.h,
+            fill: buttonEntity.fill,
+        });
 
-            this._buttonGroup.add(rect);
-        }
+        this.add(box);
 
         const text = new Konva.Text({
             x: 0,
@@ -44,21 +35,10 @@ export class Button extends AbstractEntity {
             cursor: 'pointer',
         });
 
-        this._buttonGroup.add(text);
+        this.add(text);
 
-        this._buttonGroup.on('click', evt => {
-            this._eventBus.fire('buttonclick', {
-                targetId: this._id,
-                evt: evt.evt,
-                button: this,
-            });
+        this.on('click', eventData => {
+            this.getStage()?.fire('buttonclick', eventData);
         });
-    }
-
-    get instance() {
-        return this._buttonGroup;
-    }
-    get id() {
-        return this._id;
     }
 }

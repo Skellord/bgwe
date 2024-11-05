@@ -1,65 +1,67 @@
 import Konva from 'konva';
 import { IRect } from 'konva/lib/types';
 
-import { EventBus } from './EventBus.ts';
-import { EventTypes } from './types.ts';
 import { GameEngine } from '../GameEngine.ts';
 import { Deck, Stack } from '../objects/index.ts';
+
+const draggingAllowedNames = ['card'];
 
 export class DragEventsHandler {
     private _stage: Konva.Stage;
     private readonly _mainLayer: Konva.Layer;
     private readonly _dragLayer: Konva.Layer;
-    private _eventBus: EventBus;
     private readonly _entities: Array<Deck | Stack> = [];
 
     constructor(gameEngine: GameEngine) {
         this._stage = gameEngine.stage;
         this._mainLayer = gameEngine.mainLayer;
         this._dragLayer = gameEngine.dragLayer;
-        this._eventBus = gameEngine.eventBus;
         this._entities = [...gameEngine.entitiesController.decks, ...gameEngine.entitiesController.stacks];
         this.subscribe();
     }
 
     private subscribe() {
-        this._eventBus.subscribe(EventTypes.CardDragStart, eventData => {
-            eventData.evt.preventDefault();
-            const card = eventData.card;
-            card.instance.moveTo(this._dragLayer);
+        this._stage.on('dragstart', eventData => {
+            const { target } = eventData;
 
-            if (card.parent) {
-                card.parent.removeCard(card);
+            if (!draggingAllowedNames.some(name => target.name().startsWith(name))) return;
+
+            const parent = target.getParent();
+
+            if (parent) {
+                if ('removeCard' in parent) {
+                    //@ts-ignore
+                    parent.removeCard(target);
+                }
             }
 
-            this._mainLayer.draw();
+            target.moveTo(this._dragLayer);
         });
 
-        this._eventBus.subscribe(EventTypes.CardDragEnd, eventData => {
-            const card = eventData.card;
+        this._stage.on('dragend', eventData => {
+            const { target } = eventData;
+            if (target instanceof Konva.Stage) return;
             let pos = this._stage.getPointerPosition();
+            let overlappingEntity;
+            const [_, name] = target.name().split('_');
 
             if (pos) {
-                let overlappingEntity;
                 for (const entity of this._entities) {
-                    if (this.overlaps(pos, entity.instance.getClientRect())) {
+                    if (this.overlaps(pos, entity.getClientRect())) {
                         overlappingEntity = entity;
                         break;
                     }
                 }
 
                 if (overlappingEntity) {
-                    if (card.name === overlappingEntity.for) {
-                        overlappingEntity.addCard(card);
+                    if (name === overlappingEntity.for) {
+                        //@ts-ignore
+                        overlappingEntity.addCard(target as Konva.Group);
                     }
                 } else {
-                    card.instance.moveTo(this._mainLayer);
+                    target.moveTo(this._mainLayer);
                 }
             }
-
-            this._eventBus.fire('_change', {
-                target: card,
-            });
         });
     }
 

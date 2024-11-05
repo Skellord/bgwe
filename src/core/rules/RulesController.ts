@@ -1,17 +1,18 @@
+import Konva from 'konva';
+
 import { GameEngine } from '../GameEngine.ts';
 import { ParamsStore } from './ParamsStore.ts';
 import { Action, GameParameters } from './types.ts';
 import { ActionsStore } from './ActionsStore.ts';
-import { EventBus } from '../events';
 
 export class RulesController {
+    private _stage: Konva.Stage;
     private readonly _paramsStore: ParamsStore;
     private _actionsStore: ActionsStore = new ActionsStore();
-    private _eventBus: EventBus;
 
     constructor(gameEngine: GameEngine) {
-        this._eventBus = gameEngine.eventBus;
         this._paramsStore = new ParamsStore(gameEngine.eventBus);
+        this._stage = gameEngine.stage;
     }
 
     registerParameters(params: GameParameters) {
@@ -28,7 +29,8 @@ export class RulesController {
 
     activateActions() {
         this._actionsStore.actions.forEach(a => {
-            this._eventBus.subscribe(a.on, eventData => {
+            //TODO: сделать валидацию на таргет ид
+            this._stage.on(a.on, eventData => {
                 a.handler({ ...eventData, paramsStore: this.paramsStore });
             });
         });

@@ -1,36 +1,32 @@
 import Konva from 'konva';
 
-import { AbstractEntity, DeckEntity } from './types.ts';
+import { DeckEntity } from './types.ts';
 import { Card } from './Card.ts';
-import { EventBus, EventTypes } from '../events/index.ts';
 import { Utils } from '../utils/index.ts';
 
-export class Deck extends AbstractEntity {
-    private readonly _deckGroup: Konva.Group;
+export class Deck extends Konva.Group {
     private readonly _for: string;
     private _cards: Card[] = [];
-    private _id: string;
     private _isFlipped: boolean;
-    private _eventBus: EventBus;
     private _counter?: Konva.Text;
     private _parameters: DeckEntity;
 
-    constructor(deckEntity: DeckEntity, eventBus: EventBus) {
-        super();
-        this._eventBus = eventBus;
-        this._parameters = deckEntity;
-
-        this._deckGroup = new Konva.Group({
+    constructor(deckEntity: DeckEntity) {
+        super({
             x: deckEntity.x,
             y: deckEntity.y,
             width: deckEntity.w,
             height: deckEntity.h,
-            name: deckEntity.type,
+            id: deckEntity.id,
+            name: `${deckEntity.type}`,
+            rotation: deckEntity.rotation,
             offset: {
                 x: Math.round(deckEntity.w / 2),
                 y: Math.round(deckEntity.h / 2),
             },
         });
+
+        this._parameters = deckEntity;
 
         const box = new Konva.Rect({
             width: deckEntity.w,
@@ -52,14 +48,17 @@ export class Deck extends AbstractEntity {
                 text: '0',
             });
 
-            this._deckGroup.add(this._counter);
+            this.add(this._counter);
         }
 
         this._isFlipped = deckEntity.isFlipped;
-        this._deckGroup.add(box);
+        this.add(box);
         this._for = deckEntity.for;
-        this._id = deckEntity.id;
-        this.subscribeToEvents();
+
+        this.on('contextmenu', eventData => {
+            eventData.evt.preventDefault();
+            this.getStage()?.fire('deckcontextmenu', { target: this });
+        });
     }
 
     addCard(card: Card) {
@@ -70,11 +69,10 @@ export class Deck extends AbstractEntity {
             card.indexInDeck = this._cards.length - 1;
         }
 
-        card.instance.moveTo(this._deckGroup);
+        this.add(card);
+        const absolutePos = this.getAbsolutePosition();
+        card.setAbsolutePosition(absolutePos);
         card.rotate(0);
-        const absolutePosition = this._deckGroup.getAbsolutePosition();
-        card.instance.setAbsolutePosition(absolutePosition);
-        card.parent = this;
         card.isFlipped = this._isFlipped;
         this.updateVisibleCards();
         this.updateCounter();
@@ -89,16 +87,12 @@ export class Deck extends AbstractEntity {
     }
 
     removeCard(card: Card) {
-        this._cards = this._cards.filter(c => c.id !== card.id);
-        card.parent = null;
+        console.log(card, this._cards);
+        this._cards = this._cards.filter(c => c.id() !== card.id());
         card.indexInDeck = null;
         this.updateCardIndexes();
         this.updateVisibleCards();
         this.updateCounter();
-    }
-
-    rotate(deg: number) {
-        this._deckGroup.rotate(deg);
     }
 
     shuffle() {
@@ -119,25 +113,15 @@ export class Deck extends AbstractEntity {
         });
     }
 
-    private subscribeToEvents() {
-        this._deckGroup.on('contextmenu', evt => {
-            evt.evt.preventDefault();
-            this._eventBus.fire(EventTypes.DeckMenuOpen, {
-                deck: this,
-                evt: evt.evt,
-            });
-        });
-    }
-
     private updateVisibleCards() {
         this._cards.forEach((card, index) => {
-            card.instance.setAttrs({
+            card.setAttrs({
                 visible: index >= this._cards.length - 2,
                 listening: index >= this._cards.length - 2,
             });
 
             if (index >= this._cards.length - 2) {
-                card.instance.moveToTop();
+                card.moveToTop();
             }
         });
     }
@@ -148,18 +132,6 @@ export class Deck extends AbstractEntity {
 
             c.isFlipped = this._isFlipped;
         });
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    set id(id: string) {
-        this._id = id;
-    }
-
-    get instance() {
-        return this._deckGroup;
     }
 
     get for() {
